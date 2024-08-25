@@ -2,8 +2,8 @@
 
 Login::Login()
 {
-    //身份信息
-    this->identityType="";
+    // //身份信息
+    // this->identityType="";
 
     QVBoxLayout * mainLayOut=new QVBoxLayout(this);
     // 创建三个按钮
@@ -13,8 +13,8 @@ Login::Login()
 
     // 创建水平布局来放置三个按钮
     QHBoxLayout *identityButton= new QHBoxLayout;
-    identityButton->addWidget(teacherButton);
     identityButton->addWidget(studentButton);
+    identityButton->addWidget(teacherButton);
     identityButton->addWidget(adminButton);
 
 
@@ -48,6 +48,9 @@ Login::Login()
 
     //信号与槽
     connect(logInButton,&QPushButton::clicked,this,&Login::handleLogin);
+    connect(teacherButton,&QPushButton::clicked,this,&Login::selectTeacher);
+    connect(studentButton,&QPushButton::clicked,this,&Login::selectStudent);
+    connect(adminButton,&QPushButton::clicked,this,&Login::selectAdmin);
 }
 
 void Login::handleLogin()
@@ -74,12 +77,14 @@ void Login::handleLogin()
 
         msgBox.exec();  // 显示消息框
     }
-    else
+    else//已选择身份
     {
         //用户名或密码正确
-        if(QString((this->accountInput)->text())=="1111"&& QString((this->passwordInput->text()))=="0000")
+        //update
+        if(QString((this->accountInput)->text())=="1"&& QString((this->passwordInput->text()))=="0")
         {
-        this->close();
+
+            this->close();
         }
         else//用户名或密码输入错误
         {

@@ -7,6 +7,8 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include "login.h"
+#include "headwidget.h"
+#include "adminmainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,8 +25,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    Login login;
-    login.show();
+    AdminMainWindow w;
+    w.show();
 
     return a.exec();
 }
