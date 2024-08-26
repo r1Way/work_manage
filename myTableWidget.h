@@ -15,6 +15,9 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QMenu>
+#include <QAction>
+#include <QPoint>
 class myTableWidget:public QWidget
 {
 public:
@@ -30,6 +33,9 @@ protected:
     QScrollArea *scrollArea;
     QPushButton *ensureBatch;
     void search(const QString &keyword);
+
+public slots:
+    void showContextMenu(const QPoint &pos);
 };
 
 #endif // MYTABLEWIDGET_H

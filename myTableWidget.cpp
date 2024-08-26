@@ -51,6 +51,11 @@ myTableWidget::myTableWidget(){
 
     //各btn与table connect
 
+
+    //鼠标右键菜单栏
+    // 在你的类的构造函数中或者初始化UI函数中
+    tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &myTableWidget::showContextMenu);
 }
 
 void myTableWidget::search(const QString &keyword)
@@ -66,5 +71,25 @@ void myTableWidget::search(const QString &keyword)
         }
         tableWidget->setRowHidden(i, !match);
     }
+}
+
+void myTableWidget::showContextMenu(const QPoint &pos)
+{
+    // 为了在选中行时弹出菜单，你可以使用下面的代码
+    QMenu contextMenu(tr("Context menu"), this);
+    //update
+    QAction action1("修改此项", this);
+    connect(&action1, &QAction::triggered, this, [](){qDebug()<<"modify";});
+    contextMenu.addAction(&action1);
+
+    QAction action2("删除", this);
+    connect(&action2, &QAction::triggered, this, [](){qDebug()<<"deleteRow";});
+    contextMenu.addAction(&action2);
+
+    QAction action3("修改此行",this);
+    connect(&action3, &QAction::triggered, this, [](){qDebug()<<"deleteRow";});
+    contextMenu.addAction(&action3);
+
+    contextMenu.exec(tableWidget->mapToGlobal(pos));
 }
 

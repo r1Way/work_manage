@@ -17,7 +17,8 @@ SOURCES += \
     login.cpp \
     main.cpp \
     mainwindow.cpp \
-    myTableWidget.cpp
+    myTableWidget.cpp \
+    teachermainwindow.cpp
 
 HEADERS += \
     StudentTable.h \
@@ -27,7 +28,8 @@ HEADERS += \
     headwidget.h \
     login.h \
     mainwindow.h \
-    myTableWidget.h
+    myTableWidget.h \
+    teachermainwindow.h
 
 FORMS += \
     mainwindow.ui

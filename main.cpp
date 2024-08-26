@@ -9,6 +9,7 @@
 #include "login.h"
 #include "headwidget.h"
 #include "adminmainwindow.h"
+#include "teachermainwindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    AdminMainWindow w;
+    TeacherMainWindow w;
     w.show();
 
     return a.exec();
