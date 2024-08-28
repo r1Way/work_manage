@@ -1,6 +1,6 @@
 #include "StudentTable.h"
 
-StudentTable::StudentTable():myTableWidget()
+StudentTable::StudentTable():MyTableWidget()
 {
 
     tableWidget->setColumnCount(3);  // 设置列数为3
@@ -9,7 +9,15 @@ StudentTable::StudentTable():myTableWidget()
 
     // 添加数据
     // 创建 ODBC 数据库对象
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
+    QSqlDatabase db;
+    if(QSqlDatabase::contains("qt_sql_default_connection"))
+    {
+        db=QSqlDatabase::database("qt_sql_default_connection");
+    }
+    else
+    {
+        db = QSqlDatabase::addDatabase("QODBC");
+    }
     // 设置 DSN
     db.setHostName("127.0.0.1");
     db.setDatabaseName("Mysql");

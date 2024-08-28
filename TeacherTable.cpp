@@ -8,7 +8,15 @@ TeacherTable::TeacherTable()
 
     // 添加数据
     // 创建 ODBC 数据库对象
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
+    QSqlDatabase db;
+    if(QSqlDatabase::contains("qt_sql_default_connection"))
+    {
+        db=QSqlDatabase::database("qt_sql_default_connection");
+    }
+    else
+    {
+        db = QSqlDatabase::addDatabase("QODBC");
+    }
     // 设置 DSN
     db.setHostName("127.0.0.1");
     db.setDatabaseName("Mysql");

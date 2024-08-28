@@ -2,11 +2,11 @@
 #define STUDENTTABLE_H
 
 #include <QWidget>
-#include <myTableWidget.h>
+#include <MyTableWidget.h>
 #include <QHeaderView>
 
 
-class StudentTable:public myTableWidget
+class StudentTable:public MyTableWidget
 {
 public:
     StudentTable();

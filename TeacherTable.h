@@ -2,10 +2,10 @@
 #define TEACHERTABLE_H
 
 #include <QWidget>
-#include "myTableWidget.h"
+#include "MyTableWidget.h"
 #include <QHeaderView>
 
-class TeacherTable : public myTableWidget
+class TeacherTable : public MyTableWidget
 {
 public:
     TeacherTable();

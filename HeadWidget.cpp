@@ -1,4 +1,4 @@
-#include "headwidget.h"
+#include "HeadWidget.h"
 
 HeadWidget::HeadWidget(QWidget *parent)
     : QWidget{parent}

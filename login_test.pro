@@ -9,30 +9,37 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    AdminMainwindow.cpp \
+    BasicWindow.cpp \
+    FileWindow.cpp \
+    HeadWidget.cpp \
+    Highlighter.cpp \
+    Login.cpp \
+    MyMainWidget.cpp \
+    MyTableWidget.cpp \
+    StudentMainwindow.cpp \
     StudentTable.cpp \
+    TableWindow.cpp \
+    TeacherMainwindow.cpp \
     TeacherTable.cpp \
-    admin.cpp \
-    adminmainwindow.cpp \
-    headwidget.cpp \
-    login.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    myTableWidget.cpp \
-    teachermainwindow.cpp
+    main.cpp
 
 HEADERS += \
+    AdminMainwindow.h \
+    BasicWindow.h \
+    FileWindow.h \
+    HeadWidget.h \
+    Highlighter.h \
+    Login.h \
+    MyMainWidget.h \
+    MyTableWidget.h \
+    StudentMainwindow.h \
     StudentTable.h \
-    TeacherTable.h \
-    admin.h \
-    adminmainwindow.h \
-    headwidget.h \
-    login.h \
-    mainwindow.h \
-    myTableWidget.h \
-    teachermainwindow.h
+    TableWindow.h \
+    TeacherMainwindow.h \
+    TeacherTable.h
 
-FORMS += \
-    mainwindow.ui
+FORMS +=
 
 TRANSLATIONS += \
     login_test_zh_CN.ts

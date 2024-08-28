@@ -1,4 +1,4 @@
-        #include "adminmainwindow.h"
+#include "AdminMainwindow.h"
 
 AdminMainWindow::AdminMainWindow(QWidget *parent)
     : QMainWindow{parent}
@@ -97,7 +97,7 @@ AdminMainWindow::AdminMainWindow(QWidget *parent)
             delete tableWidget;
             tableWidget=nullptr;
         }
-        tableWidget=new myTableWidget;//update
+        tableWidget=new MyTableWidget;//update
         rightLayOut->addWidget(tableWidget);
     });
 }

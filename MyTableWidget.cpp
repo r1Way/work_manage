@@ -1,6 +1,6 @@
-#include "myTableWidget.h"
+#include "MyTableWidget.h"
 
-myTableWidget::myTableWidget(){
+MyTableWidget::MyTableWidget(){
     //font
     font=new QFont;
     font->setPointSize(14);
@@ -55,10 +55,10 @@ myTableWidget::myTableWidget(){
     //鼠标右键菜单栏
     // 在你的类的构造函数中或者初始化UI函数中
     tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &myTableWidget::showContextMenu);
+    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &MyTableWidget::showContextMenu);
 }
 
-void myTableWidget::search(const QString &keyword)
+void MyTableWidget::search(const QString &keyword)
 {
     for (int i = 0; i < tableWidget->rowCount(); ++i) {
         bool match = false;
@@ -73,7 +73,7 @@ void myTableWidget::search(const QString &keyword)
     }
 }
 
-void myTableWidget::showContextMenu(const QPoint &pos)
+void MyTableWidget::showContextMenu(const QPoint &pos)
 {
     // 为了在选中行时弹出菜单，你可以使用下面的代码
     QMenu contextMenu(tr("Context menu"), this);

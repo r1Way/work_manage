@@ -9,8 +9,8 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
-#include "headwidget.h"
-#include "myTableWidget.h"
+#include "HeadWidget.h"
+#include "MyTableWidget.h"
 #include "StudentTable.h"
 #include "TeacherTable.h"
 class AdminMainWindow : public QMainWindow
@@ -19,7 +19,7 @@ class AdminMainWindow : public QMainWindow
 public:
     explicit AdminMainWindow(QWidget *parent = nullptr);
 private:
-    myTableWidget *tableWidget;
+    MyTableWidget *tableWidget;
 signals:
 };
 

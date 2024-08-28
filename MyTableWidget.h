@@ -18,17 +18,20 @@
 #include <QMenu>
 #include <QAction>
 #include <QPoint>
-class myTableWidget:public QWidget
+class MyTableWidget:public QWidget
 {
 public:
-    myTableWidget();
-protected:
-    QFont * font;
+    MyTableWidget();
+    QFont * font;//字体
+
+    QHBoxLayout * searchLayOut;
+
     QPushButton *add;
     QPushButton *batch;
+
     QLineEdit *searchEdit;
     QPushButton *searchBtn;
-    QHBoxLayout * searchLayOut;
+
     QTableWidget * tableWidget;
     QScrollArea *scrollArea;
     QPushButton *ensureBatch;
