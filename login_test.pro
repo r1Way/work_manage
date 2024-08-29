@@ -11,11 +11,11 @@ CONFIG += c++17
 SOURCES += \
     AdminMainwindow.cpp \
     BasicWindow.cpp \
+    ClassTable.cpp \
     FileWindow.cpp \
     HeadWidget.cpp \
     Highlighter.cpp \
     Login.cpp \
-    MyMainWidget.cpp \
     MyTableWidget.cpp \
     StudentMainwindow.cpp \
     StudentTable.cpp \
@@ -27,11 +27,11 @@ SOURCES += \
 HEADERS += \
     AdminMainwindow.h \
     BasicWindow.h \
+    ClassTable.h \
     FileWindow.h \
     HeadWidget.h \
     Highlighter.h \
     Login.h \
-    MyMainWidget.h \
     MyTableWidget.h \
     StudentMainwindow.h \
     StudentTable.h \
@@ -50,3 +50,6 @@ CONFIG += embed_translations
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    ../build-login_test-Desktop_Qt_6_7_0_MinGW_64_bit-Debug/debug/resource.qrc

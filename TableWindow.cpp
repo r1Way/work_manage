@@ -5,7 +5,6 @@ TableWindow::TableWindow(QStringList information)
     //line edit
     searchEdit=new QLineEdit;
     searchLayout->addWidget(searchEdit);
-    //rightLayout->addLayout(searchLayout);基类中已经实现
 
     //search btn
     searchBtn=new QPushButton("搜索");
@@ -42,21 +41,8 @@ void TableWindow::connectDataBase(QString select,QString driver,QString hostName
     this->databaseName=databaseName;
     this->userName=userName;
     this->password=password;
-
-    // 创建 ODBC 数据库对象
-    db = QSqlDatabase::addDatabase(driver);
-    // 设置 DSN
-    db.setHostName(hostName);
-    db.setDatabaseName(databaseName);
-    db.setUserName(userName);
-    db.setPassword(password); //用数据库实际账号密码代替
-    // 打开数据库连接
-    if (!db.open())
-    {
-        qDebug("打开数据库连接失败" );
-    }
-    QSqlQuery query=QSqlQuery(QString(select));
-    while (query.next())
+    QSqlQuery query=QSqlQuery(select);
+    while (query.next())//bug
     {
         QStringList list;
         for(int i=0;i<information.size();i++)

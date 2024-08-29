@@ -18,6 +18,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QPoint>
+#include <QStringList>
 class MyTableWidget:public QWidget
 {
 public:
@@ -36,9 +37,8 @@ public:
     QScrollArea *scrollArea;
     QPushButton *ensureBatch;
     void search(const QString &keyword);
+    QStringList information;
 
-public slots:
-    void showContextMenu(const QPoint &pos);
 };
 
 #endif // MYTABLEWIDGET_H

@@ -4,7 +4,8 @@ Login::Login()
 {
     // //身份信息
     // this->identityType="";
-
+    setWindowIcon(QIcon("://img/icopng"));
+    setWindowTitle("C++作业管理系统");
     QVBoxLayout * mainLayOut=new QVBoxLayout(this);
     // 创建三个按钮
     QPushButton *teacherButton = new QPushButton("教师");
@@ -16,7 +17,6 @@ Login::Login()
     identityButton->addWidget(studentButton);
     identityButton->addWidget(teacherButton);
     identityButton->addWidget(adminButton);
-
 
     // 创建账号标签和输入框
     QHBoxLayout *accountLayOut=new QHBoxLayout;
@@ -81,10 +81,38 @@ void Login::handleLogin()
     {
         //用户名或密码正确
         //update
-        if(QString((this->accountInput)->text())=="1"&& QString((this->passwordInput->text()))=="0")
+        //test begin
+        //if(correct(accountInput->text(),passwordInput->text()))
+        if(true)// test end
         {
-
             this->close();
+
+            //test begin
+            // identityType="teacher";
+            //test end
+            if (identityType=="admin")
+            {
+                ::user_account=accountInput->text();
+                AdminMainWindow *window=new AdminMainWindow;
+                window->show();
+            }
+            else if(identityType=="teacher")
+            {
+                // ::user_account=accountInput->text();
+                ::user_account="113210";
+                TeacherMainWindow *window=new TeacherMainWindow;
+                window->show();
+            }
+            else if(identityType=="student")
+            {
+                ::user_account=accountInput->text();
+                StudentMainwindow * window=new StudentMainwindow;
+                window->show();
+            }
+            else
+            {
+                qDebug()<<"Login::handleLogin in ' else else '";
+            }
         }
         else//用户名或密码输入错误
         {
@@ -127,4 +155,25 @@ void Login::selectStudent()
 void Login::selectAdmin()
 {
     this->identityType="admin";
+}
+
+bool Login::correct(QString id, QString password)
+{
+    QSqlQuery query(QString("SELECT count(*) FROM pass where user='%1' and id=%2 and password='%3'").arg(identityType).arg(id).arg(password));
+    while(query.next())
+    {
+        if(query.isActive())
+        {
+            if(query.value(0).toInt()==1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    qDebug()<<"Login::correct";
+    return false;
 }

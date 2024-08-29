@@ -12,9 +12,16 @@
 #include <QSharedPointer>
 #include <QStackedWidget>
 #include <QTextEdit>
+#include <QDialog>
+#include <QDateEdit>
+#include <QTimeEdit>
+#include <QVector>
+#include <QCheckBox>
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"
+extern QString user_account;
+extern QSqlDatabase db;
 class TeacherMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,12 +29,15 @@ public:
     explicit TeacherMainWindow(QWidget *parent = nullptr);
 
     TableWindow *tableWindow;
-
+    QPushButton *ensureBatch;
 signals:
 public slots:
     void itemDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
-    void homeworkDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);//选中是哪次作业
+    void homeworkDoubleClicked(int row, QStackedWidget *stackedWidget,TableWindow *tableWindow2);//选中是哪次作业
     void studentDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
+    void assignHomework(QString classId,TableWindow *tableWindow2);
+    void batchHomework();
+    void addHomework(QString,QString,QString,QString,QString,TableWindow *tableWindow2);
 };
 
 #endif // TEACHERMAINWINDOW_H

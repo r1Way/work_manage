@@ -97,7 +97,7 @@ AdminMainWindow::AdminMainWindow(QWidget *parent)
             delete tableWidget;
             tableWidget=nullptr;
         }
-        tableWidget=new MyTableWidget;//update
+        tableWidget=new ClassTable;//update
         rightLayOut->addWidget(tableWidget);
     });
 }

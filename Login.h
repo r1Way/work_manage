@@ -8,6 +8,15 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QMessageBox>
+#include <QSqlQuery>
+#include <QSqlDatabase>
+#include <QSqlRecord>
+#include <QIcon>
+#include "AdminMainwindow.h"
+#include "TeacherMainwindow.h"
+#include "StudentMainwindow.h"
+extern QString user_account;
+extern QSqlDatabase db;
 class Login : public QDialog
 {
 public:
@@ -21,6 +30,7 @@ private:
     QLineEdit *accountInput;
     QLineEdit *passwordInput;
     QString identityType;
+    bool correct(QString id,QString password);
 };
 
 #endif // LOGIN_H

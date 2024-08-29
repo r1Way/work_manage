@@ -1,6 +1,7 @@
 #include "MyTableWidget.h"
 
 MyTableWidget::MyTableWidget(){
+
     //font
     font=new QFont;
     font->setPointSize(14);
@@ -38,6 +39,7 @@ MyTableWidget::MyTableWidget(){
 
     //table
     tableWidget = new QTableWidget;
+    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     mainLayout->addWidget(tableWidget);//挂在layout上
     tableWidget->setSortingEnabled(true);// 启用表头的排序功能
     font->setPointSize(13);
@@ -55,7 +57,7 @@ MyTableWidget::MyTableWidget(){
     //鼠标右键菜单栏
     // 在你的类的构造函数中或者初始化UI函数中
     tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &MyTableWidget::showContextMenu);
+
 }
 
 void MyTableWidget::search(const QString &keyword)
@@ -73,23 +75,5 @@ void MyTableWidget::search(const QString &keyword)
     }
 }
 
-void MyTableWidget::showContextMenu(const QPoint &pos)
-{
-    // 为了在选中行时弹出菜单，你可以使用下面的代码
-    QMenu contextMenu(tr("Context menu"), this);
-    //update
-    QAction action1("修改此项", this);
-    connect(&action1, &QAction::triggered, this, [](){qDebug()<<"modify";});
-    contextMenu.addAction(&action1);
 
-    QAction action2("删除", this);
-    connect(&action2, &QAction::triggered, this, [](){qDebug()<<"deleteRow";});
-    contextMenu.addAction(&action2);
-
-    QAction action3("修改此行",this);
-    connect(&action3, &QAction::triggered, this, [](){qDebug()<<"deleteRow";});
-    contextMenu.addAction(&action3);
-
-    contextMenu.exec(tableWidget->mapToGlobal(pos));
-}
 

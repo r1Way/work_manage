@@ -13,6 +13,7 @@
 #include "MyTableWidget.h"
 #include "StudentTable.h"
 #include "TeacherTable.h"
+#include "ClassTable.h"
 class AdminMainWindow : public QMainWindow
 {
     Q_OBJECT

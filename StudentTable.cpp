@@ -4,34 +4,15 @@ StudentTable::StudentTable():MyTableWidget()
 {
 
     tableWidget->setColumnCount(3);  // 设置列数为3
-    tableWidget->setHorizontalHeaderLabels({ "学号","姓名", "专业"});
+    information={ "学号","姓名", "专业"};
+    tableWidget->setHorizontalHeaderLabels(information);
     tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // 添加数据
-    // 创建 ODBC 数据库对象
-    QSqlDatabase db;
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-    {
-        db=QSqlDatabase::database("qt_sql_default_connection");
-    }
-    else
-    {
-        db = QSqlDatabase::addDatabase("QODBC");
-    }
-    // 设置 DSN
-    db.setHostName("127.0.0.1");
-    db.setDatabaseName("Mysql");
-    db.setUserName("root");
-    db.setPassword("111111"); //用数据库实际账号密码代替
-    // 打开数据库连接
-    if (!db.open())
-    {
-        qDebug("打开数据库连接失败" );
-    }
     QSqlQuery query("SELECT * FROM student");
     while (query.next())
     {
-        addStudent(query.value("id").toString(),query.value("name").toString(),query.value("major").toString());
+        addStudent(query.value("student_id").toString(),query.value("name").toString(),query.value("major").toString());
     }
 
     // 连接搜索按钮点击信号到槽函数
@@ -39,11 +20,13 @@ StudentTable::StudentTable():MyTableWidget()
         search(searchEdit->text());
     });
 
+    //鼠标右键菜单
+    connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &StudentTable::showContextMenu);
+
+
     //addBtn的槽
     connect(add,&QPushButton::clicked,[this]()
             {
-
-
                 //font
                 QFont *font=new QFont;
                 font->setPointSize(13);
@@ -92,11 +75,18 @@ StudentTable::StudentTable():MyTableWidget()
 
                 connect(ensureAdd,&QPushButton::clicked,[this,nameEdit,stuNumEdit,majorEdit,dialog]()
                 {
-                    this->addStudent(nameEdit->text(),stuNumEdit->text(),majorEdit->text());
-                     QString sql=QString("insert into student(id,name,major) value('%1','%2','%3')").arg(stuNumEdit->text()).arg(nameEdit->text()).arg(majorEdit->text());
+                    this->addStudent(stuNumEdit->text(),nameEdit->text(),majorEdit->text());
+                    QString sql=QString("insert into student(student_id,name,major) value('%1','%2','%3')").arg(stuNumEdit->text()).arg(nameEdit->text()).arg(majorEdit->text());
                     QSqlQuery queryAdd;
                     queryAdd.exec(sql);
                     dialog->close();
+
+                    QSqlQuery query(QString("SELECT count(*) FROM pass where user='student' and id=%1").arg(stuNumEdit->text().toInt()));
+                    while (query.next())
+                    {
+                        query.exec(QString("INSERT INTO pass value('student',%1,'8888')").arg(stuNumEdit->text().toInt()));
+                    }
+
                 });
 
                 dialog->show();
@@ -137,14 +127,12 @@ StudentTable::StudentTable():MyTableWidget()
                     QCheckBox *checkBox = qobject_cast<QCheckBox*>(tableWidget->cellWidget(i, cols));
                     if (checkBox && checkBox->isChecked())
                     {
-
-
                         QSqlQuery query_remove;
                         QString id=tableWidget->takeItem(i,0)->text();
                         //tableWidget中删除
                         tableWidget->removeRow(i);
                         //sql中删除
-                        QString sql=QString("delete from student where id='%1';").arg(id);
+                        QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
                         query_remove.exec(sql);
                         emit batch->clicked();
                     }
@@ -167,11 +155,59 @@ StudentTable::StudentTable():MyTableWidget()
     });
 }
 
-void StudentTable::addStudent(const QString &name, const QString &id, const QString &major)
+void StudentTable::addStudent(const QString &id, const QString &name, const QString &major)
 {
     int row = tableWidget->rowCount();
     tableWidget->insertRow(row);
-    tableWidget->setItem(row, 0, new QTableWidgetItem(name));
-    tableWidget->setItem(row, 1, new QTableWidgetItem(id));
+    tableWidget->setItem(row, 0, new QTableWidgetItem(id));
+    tableWidget->setItem(row, 1, new QTableWidgetItem(name));
     tableWidget->setItem(row, 2, new QTableWidgetItem(major));
+}
+
+void StudentTable::showContextMenu(const QPoint &pos)
+{
+    //菜单栏
+    QMenu contextMenu(tr("Context menu"), this);
+
+    QTableWidgetItem *item=tableWidget->itemAt(pos);
+    int row=item->row();
+    QAction * action1=new QAction("删除此行", this);
+    connect(action1, &QAction::triggered, this, [this,row]()
+    {
+        QSqlQuery query_remove;
+        QString id=tableWidget->takeItem(row,0)->text();
+        //tableWidget中删除
+        tableWidget->removeRow(row);
+        //sql中删除
+        QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
+        query_remove.exec(sql);
+    });
+    contextMenu.addAction(action1);
+
+    contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
+}
+
+void StudentTable::editStudent(int row)
+{
+
+    QDialog *dialog=new QDialog;
+    dialog->setWindowTitle("修改学生");
+    QVector<QLabel*> labels;
+    QVector<QLineEdit*> lineEdits;
+    QVector<QHBoxLayout*> hLayouts;
+    QVBoxLayout * layout=new QVBoxLayout(dialog);
+    QPushButton *ensure=new QPushButton("确认");
+    for(int i=0;i<information.size();i++)
+    {
+        labels.push_back(new QLabel(information[i]));
+        lineEdits.push_back(new QLineEdit);
+        hLayouts.push_back(new QHBoxLayout);
+        layout->addLayout(hLayouts[i]);
+        hLayouts[i]->addWidget(labels[i]);
+        QTableWidgetItem *tempItem=tableWidget->itemAt(row,i);
+        labels[i]->setText(tempItem->text());
+        hLayouts[i]->addWidget(lineEdits[i]);
+    }
+    layout->addWidget(ensure);
+    dialog->exec();
 }
