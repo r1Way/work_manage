@@ -3,7 +3,8 @@
 #include <QWidget>
 #include "MyTableWidget.h"
 #include <QHeaderView>
-
+#include <Qdir>
+extern QString PATH;
 class ClassTable: public MyTableWidget
 {
 public:

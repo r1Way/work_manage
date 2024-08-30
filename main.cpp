@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QDir>
 #include "StudentMainwindow.h"
 #include "BasicWindow.h"
 #include "FileWindow.h"
@@ -16,8 +17,26 @@
 
 QSqlDatabase db;
 QString user_account;
+QString PATH;
 int main(int argc, char *argv[])
 {
+    //获取当前路径
+    QDir dir(QDir::currentPath());
+    PATH=dir.path()+"data";
+    qDebug()<<PATH;
+
+
+    if(!dir.exists("data"))
+    {
+        dir.mkdir("data");    //创建文件夹（名为Images）
+
+        qDebug()<<QString("文件夹%1创建成功！").arg("data");
+    }
+    else
+    {
+        qDebug()<<QString("文件夹%1已存在！").arg("data");
+    }
+
     QApplication a(argc, argv);
     // 创建 ODBC 数据库对象
     if(QSqlDatabase::contains("qt_sql_default_connection"))

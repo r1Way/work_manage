@@ -80,6 +80,12 @@ ClassTable::ClassTable()
                             QSqlQuery queryAdd;
                             queryAdd.exec(sql);
                             dialog->close();
+                            //创建文件夹
+                            QDir dir(PATH);
+                            if(!dir.exists(idEdit->text()))
+                            {
+                                dir.mkdir(idEdit->text());
+                            }
                         });
 
                 dialog->show();

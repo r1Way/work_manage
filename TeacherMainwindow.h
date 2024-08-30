@@ -22,6 +22,7 @@
 #include "FileWindow.h"
 extern QString user_account;
 extern QSqlDatabase db;
+extern QString PATH;
 class TeacherMainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -36,7 +37,6 @@ public slots:
     void homeworkDoubleClicked(int row, QStackedWidget *stackedWidget,TableWindow *tableWindow2);//选中是哪次作业
     void studentDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
     void assignHomework(QString classId,TableWindow *tableWindow2);
-    void batchHomework();
     void addHomework(QString,QString,QString,QString,QString,TableWindow *tableWindow2);
 };
 

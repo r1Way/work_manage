@@ -150,10 +150,12 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
 
 void TeacherMainWindow::homeworkDoubleClicked(int workRow, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
 {
-    //update
+    //选择了是哪次作业以后
     //界面切换
+    //QStringList list3={"学号","分数","提交日期","提交时间"};
     QStringList list3={"工号","姓名","专业"};
     TableWindow *tableWindow3=new TableWindow(list3);
+    QString sql=QString();
     tableWindow3->connectDataBase("select * from teacher");
     stackedWidget->addWidget(tableWindow3);
     stackedWidget->setCurrentIndex(2);
@@ -161,7 +163,12 @@ void TeacherMainWindow::homeworkDoubleClicked(int workRow, QStackedWidget *stack
     //left layout
     QPushButton *returnBtn=new QPushButton("返回");
     tableWindow3->leftLayout->addWidget(returnBtn);
-    connect(returnBtn,&QPushButton::clicked,[stackedWidget](){stackedWidget->setCurrentIndex(1);});
+    connect(returnBtn,&QPushButton::clicked,[stackedWidget,tableWindow3]()
+    {
+        stackedWidget->setCurrentIndex(1);
+        stackedWidget->removeWidget(tableWindow3);
+        tableWindow3->deleteLater();
+    });
 
     QTextEdit *textEdit=new QTextEdit;
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
@@ -230,12 +237,14 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
                           .arg(timeEdit->time().toString("HH:mm:ss"));
         query.exec(sql);
         dialog->close();
+        //创建文件夹
+        QDir dir(PATH+"/"+classId);
+        if(!dir.exists(nameEdit->text()))
+        {
+            dir.mkdir(nameEdit->text());
+        }
     });
     dialog->show();
-}
-
-void TeacherMainWindow::batchHomework()
-{
 }
 
 void TeacherMainWindow::addHomework(QString classId, QString name, QString description, QString date, QString time,TableWindow *tableWindow2)
