@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 {
     //获取当前路径
     QDir dir(QDir::currentPath());
-    PATH=dir.path()+"data";
+    PATH=dir.path()+"/data";
     qDebug()<<PATH;
 
 

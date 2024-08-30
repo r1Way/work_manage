@@ -17,6 +17,7 @@
 #include <QTimeEdit>
 #include <QVector>
 #include <QCheckBox>
+#include <QDir>
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"
@@ -34,8 +35,8 @@ public:
 signals:
 public slots:
     void itemDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
-    void homeworkDoubleClicked(int row, QStackedWidget *stackedWidget,TableWindow *tableWindow2);//选中是哪次作业
-    void studentDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
+    void homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2);//选中是哪次作业
+    void studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget);
     void assignHomework(QString classId,TableWindow *tableWindow2);
     void addHomework(QString,QString,QString,QString,QString,TableWindow *tableWindow2);
 };

@@ -105,7 +105,8 @@ void Login::handleLogin()
             }
             else if(identityType=="student")
             {
-                ::user_account=accountInput->text();
+                // ::user_account=accountInput->text();
+                ::user_account="17514";
                 StudentMainwindow * window=new StudentMainwindow;
                 window->show();
             }

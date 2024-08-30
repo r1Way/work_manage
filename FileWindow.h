@@ -14,6 +14,7 @@ class FileWindow:public BasicWindow
 {
 public:
     FileWindow();
+    bool import(QString path);
     QTabWidget *tabWidget;
     Highlighter * highlighter;
     QPushButton *returnBtn;

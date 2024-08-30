@@ -141,22 +141,24 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     connect(assignBtn,&QPushButton::clicked,[this,classId,tableWindow2](){assignHomework(classId,tableWindow2);});
 
     //双击作业double clicked
-    connect(tableWindow2->tableWidget,&QTableWidget::itemDoubleClicked,[tableWindow2,this,stackedWidget](QTableWidgetItem *item)
+    connect(tableWindow2->tableWidget,&QTableWidget::itemDoubleClicked,[className,classId,tableWindow2,this,stackedWidget](QTableWidgetItem *item)
     {
-        int workRow=item->row();
-        homeworkDoubleClicked(workRow,stackedWidget,tableWindow2);
+        int row=item->row();
+        QString homeworkName=tableWindow2->tableWidget->item(row,0)->text();
+        homeworkDoubleClicked(classId,homeworkName,stackedWidget,tableWindow2);
     });
 }
 
-void TeacherMainWindow::homeworkDoubleClicked(int workRow, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
+void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
 {
-    //选择了是哪次作业以后
+    //选择了是哪次作业以后,显示学生的提交记录
     //界面切换
-    //QStringList list3={"学号","分数","提交日期","提交时间"};
-    QStringList list3={"工号","姓名","专业"};
+    QStringList list3={"学号","提交日期","提交时间","分数"};
     TableWindow *tableWindow3=new TableWindow(list3);
-    QString sql=QString();
-    tableWindow3->connectDataBase("select * from teacher");
+    QString sql=QString("SELECT student_id,d,t,score FROM homework_student "
+                          "WHERE class_id=%1 and "
+                          "name='%2';").arg(classId).arg(homeworkName);
+    tableWindow3->connectDataBase(sql);
     stackedWidget->addWidget(tableWindow3);
     stackedWidget->setCurrentIndex(2);
 
@@ -174,16 +176,27 @@ void TeacherMainWindow::homeworkDoubleClicked(int workRow, QStackedWidget *stack
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
     tableWindow3->leftLayout->addWidget(textEdit);
 
-    //double clicked
-    connect(tableWindow3->tableWidget,&QTableWidget::itemDoubleClicked,[this,stackedWidget](QTableWidgetItem *item){studentDoubleClicked(item,stackedWidget);});
+    //选择了查看哪位学生的作业 double clicked
+    connect(tableWindow3->tableWidget,&QTableWidget::itemDoubleClicked,[tableWindow3,classId,homeworkName,this,stackedWidget](QTableWidgetItem *item)
+    {
+        int row=item->row();
+        QString studentId=tableWindow3->tableWidget->item(row,0)->text();
+        studentDoubleClicked(studentId,classId,homeworkName,stackedWidget);
+    });
 }
 
-void TeacherMainWindow::studentDoubleClicked(QTableWidgetItem *item, QStackedWidget *stackedWidget)
+void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget)
 {
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
     stackedWidget->setCurrentIndex(3);
-    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget](){stackedWidget->setCurrentIndex(2);});
+    fileWindow->import(PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId));
+    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow]()
+    {
+        stackedWidget->setCurrentIndex(2);
+        stackedWidget->removeWidget(fileWindow);
+        fileWindow->deleteLater();
+    });
 }
 
 void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2)

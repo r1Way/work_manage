@@ -13,12 +13,15 @@ FileWindow::FileWindow()
     tabWidget=new QTabWidget;
     rightLayout->addWidget(tabWidget);
 
-    //qdir
 
-    QString path="C:/Users/刘星池/Desktop/test";
+}
+
+bool FileWindow::import(QString path)
+{
     QDir directory(path);
     QStringList files = directory.entryList(QDir::Files);
-    for(QString fileName : files) {
+    for(QString fileName : files)
+    {
         qDebug() << fileName;
         if(fileName.contains(".cpp")||fileName.contains(".h"))
         {
