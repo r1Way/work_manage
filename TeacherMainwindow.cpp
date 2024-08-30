@@ -181,21 +181,46 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     {
         int row=item->row();
         QString studentId=tableWindow3->tableWidget->item(row,0)->text();
-        studentDoubleClicked(studentId,classId,homeworkName,stackedWidget);
+        studentDoubleClicked(studentId,classId,homeworkName,stackedWidget,tableWindow3);
     });
 }
 
-void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget)
+void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget,TableWindow *tableWindow3)
 {
+    //选择了打开哪位学生的作业
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
     stackedWidget->setCurrentIndex(3);
     fileWindow->import(PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId));
-    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow]()
+
+    //分数栏
+    QHBoxLayout *scoreLayout=new QHBoxLayout;
+    QLabel *score=new QLabel("分数");
+    QLineEdit *scoreEdit=new QLineEdit;
+    QPushButton *ensureScore=new QPushButton("确定");
+    scoreLayout->addWidget(score);
+    scoreLayout->addWidget(scoreEdit);
+    scoreLayout->addWidget(ensureScore);
+    fileWindow->leftLayout->addLayout(scoreLayout);
+    connect(ensureScore,&QPushButton::clicked,[studentId,classId,homeworkName,scoreEdit]()
+    {
+        int score=scoreEdit->text().toInt();
+        QSqlQuery query;
+        QString sql=QString("UPDATE homework_student "
+                              "SET score=%1 "
+                              "WHERE student_id=%2 and "
+                              "class_id=%3 and "
+                              "name='%4';").arg(score).arg(studentId).arg(classId).arg(homeworkName);
+        query.exec(sql);
+    });
+
+    //返回连接
+    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow,tableWindow3]()
     {
         stackedWidget->setCurrentIndex(2);
         stackedWidget->removeWidget(fileWindow);
         fileWindow->deleteLater();
+        tableWindow3->fresh();
     });
 }
 

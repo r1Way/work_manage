@@ -1,5 +1,21 @@
 #include "TableWindow.h"
 
+void TableWindow::fresh()
+{
+    tableWidget->setRowCount(0);
+    QSqlQuery query;
+    query.exec(selectFresh);
+    while (query.next())
+    {
+        QStringList list;
+        for(int i=0;i<information.size();i++)
+        {
+            list.append(query.value(i).toString());
+        }
+        add(list);
+    }
+}
+
 TableWindow::TableWindow(QStringList information)
 {
     //line edit
@@ -35,12 +51,13 @@ void TableWindow::tableInit(QStringList information)
 void TableWindow::connectDataBase(QString select,QString driver,QString hostName,QString databaseName,QString userName,QString password)
 {
     //赋值
-    this->tableName=tableName;
-    this->driver=driver;
-    this->hostName=hostName;
-    this->databaseName=databaseName;
-    this->userName=userName;
-    this->password=password;
+    // this->tableName=tableName;
+    // this->driver=driver;
+    // this->hostName=hostName;
+    // this->databaseName=databaseName;
+    // this->userName=userName;
+    // this->password=password;
+    this->selectFresh=select;
     QSqlQuery query=QSqlQuery(select);
     while (query.next())//bug
     {

@@ -36,7 +36,7 @@ signals:
 public slots:
     void itemDoubleClicked(QTableWidgetItem* item,QStackedWidget *stackedWidget);
     void homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2);//选中是哪次作业
-    void studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget);
+    void studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget,TableWindow *tableWindow3);
     void assignHomework(QString classId,TableWindow *tableWindow2);
     void addHomework(QString,QString,QString,QString,QString,TableWindow *tableWindow2);
 };
