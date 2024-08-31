@@ -13,7 +13,6 @@ FileWindow::FileWindow()
     tabWidget=new QTabWidget;
     rightLayout->addWidget(tabWidget);
 
-
 }
 
 bool FileWindow::import(QString path)

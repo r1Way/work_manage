@@ -79,7 +79,8 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     //已选择是何次作业
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
-    fileWindow->import(PATH+QString("/%1/%2").arg(classId).arg(homeworkName));
+    QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
+    fileWindow->import(filePath);
     stackedWidget->setCurrentIndex(2);
 
     //返回
@@ -90,11 +91,68 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
         fileWindow->deleteLater();
     });
 
+    //search layout
+    //提交作业
     QPushButton *handInHomework=new QPushButton("提交作业");
     fileWindow->searchLayout->insertWidget(0,handInHomework);
     connect(handInHomework,&QPushButton::clicked,[this,classId,homeworkName]()
     {
         handIn(classId,homeworkName);
+    });
+
+    //search layout
+    //编译运行
+    QPushButton *compile=new QPushButton("编译运行");
+    fileWindow->searchLayout->addWidget(compile);
+    connect(compile,&QPushButton::clicked,[this,filePath]()
+    {
+        QDir directory(filePath);
+        QStringList fileAll = directory.entryList(QDir::Files);
+        QStringList fileCompile;
+        for(auto fileName:fileAll)
+        {
+            if(fileName.contains(".cpp"))
+            {
+                fileCompile.push_back(fileName);
+            }
+        }
+        QProcess * process=new QProcess(this);
+        // 切换目录
+        process->setWorkingDirectory(filePath);
+        // 启动 g++ 命令
+        process->start("g++", QStringList()<<fileCompile<<"-o"<<"main");
+
+        if (!process->waitForFinished()) {
+            qDebug() << "Failed to execute g++ command.";
+            qDebug() << process->errorString(); // 输出错误信息
+        }
+        else
+        {
+            // 输出命令执行结果和错误信息
+            qDebug() << process->readAllStandardOutput();
+            qDebug() << process->readAllStandardError();
+        }
+
+        QStringList arguments;
+        // arguments << "2";  // 这里替换为你需要传递的参数
+        process->start(filePath+"/main.exe");
+        // process->write(QString::number(2).toUtf8() + "\n");
+        process->write("3\n6\n");
+        // process->closeWriteChannel(); // 关闭写通道，表示输入结束
+        if (!process->waitForFinished())
+        { // 等待程序执行完成
+        qDebug() << "Execution failed:" << process->errorString();
+        return 1;
+        }
+
+        QByteArray output = process->readAllStandardOutput(); // 读取标准输出
+        QByteArray errorOutput = process->readAllStandardError(); // 读取错误输出
+
+        qDebug() << "Output:" << output;
+        if (!errorOutput.isEmpty())
+        {
+            qDebug() << "Error Output:" << errorOutput;
+        }
     });
 }
 
@@ -107,49 +165,77 @@ void StudentMainwindow::handIn(QString classId, QString homeworkName)
         "C++ Files (*.cpp *.h);;Executable Files (*.exe)"
         );
 
-    QString destPath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
-    qDebug()<<destPath;
-    QDir dir(destPath);
-    //检查目的文件夹是否存在
-    if(!dir.exists())
+    if(fileNames.size()!=0)//如果提交了文件
     {
+        QString destPath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
+        qDebug()<<destPath;
+        QDir dir(destPath);
+        //检查目的文件夹是否存在
+        if(!dir.exists())
+        {
         bool success = dir.mkpath(".");
         if (!success) {
             // qDebug() << "Failed to create directory";
         } else {
             // qDebug() << "Directory created";
         }
-    }
+        }
 
-    // 获取文件夹中的所有文件，包括隐藏文件
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Hidden);
-    foreach(QString dirItem, dir.entryList())
-    {
+        // 获取文件夹中的所有文件，包括隐藏文件
+        dir.setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Hidden);
+        foreach(QString dirItem, dir.entryList())
+        {
         dir.remove(dirItem);
-    }
+        }
 
-    // 获取文件夹中的所有子文件夹
-    dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    foreach(QString dirItem, dir.entryList())
-    {
+        // 获取文件夹中的所有子文件夹
+        dir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+        foreach(QString dirItem, dir.entryList())
+        {
         QDir subDir(dir.absoluteFilePath(dirItem));
         // 使用递归删除子文件夹
         subDir.removeRecursively();
-    }
+        }
 
-    //文件复制
-    for(auto fileName:fileNames)
-    {
-        qDebug()<<fileName;
+        //文件复制
+        for(auto fileName:fileNames)
+        {
+        // qDebug()<<fileName;
         QFileInfo srcFileInfo(fileName);
         QFile::copy(fileName, destPath+"/"+srcFileInfo.fileName());
+        }
+
+        QString date=QDate::currentDate().toString("yyyy-MM-dd");
+        QString time=QTime::currentTime().toString("HH:mm:ss");
+
+        QSqlQuery query;
+        //检查是否已经提交
+        QString check=QString("SELECT count(*) FROM homework_student "
+                    "WHERE student_id=%1 and "
+                    "class_id=%2 and "
+                    "name='%3';").arg(user_account).arg(classId).arg(homeworkName);
+        int nums=-1;
+        query.exec(check);
+        if(query.next())
+        {
+        nums=query.value(0).toString().toInt();
+        qDebug()<<"nums="<<nums;
+        }
+
+        if(nums==0)//未曾提交
+        {
+        QString sql=QString("INSERT INTO homework_student(student_id,class_id,name,d,t) value(%1,%2,'%3','%4','%5');")
+              .arg(user_account).arg(classId).arg(homeworkName).arg(date).arg(time);
+        query.exec(sql);
+        }
+        else//曾提交
+        {
+        QString sql=QString("UPDATE homework_student SET d='%1' ,t='%2' "
+                      "WHERE student_id=%3 and "
+                      "class_id=%4 and "
+                      "name='%5';").arg(date).arg(time).arg(user_account).arg(classId).arg(homeworkName);
+        query.exec(sql);
+        }
     }
-
-    QString date=QDate::currentDate().toString("yyyy-MM-dd");
-    QString time=QTime::currentTime().toString("HH:mm:ss");
-
-    QSqlQuery query;
-    QString sql=QString("INSERT INTO homework_student(student_id,class_id,name,d,t) value(%1,%2,'%3','%4','%5')")
-                      .arg(user_account).arg(classId).arg(homeworkName).arg(date).arg(time);
-    query.exec(sql);
+    else{}//如果没有提交文件
 }

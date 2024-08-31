@@ -16,6 +16,8 @@
 #include <QFile>
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QProcess>
+#include <QByteArray>
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"

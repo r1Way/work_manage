@@ -31,6 +31,7 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     stackedWidget->addWidget(tableWindow);
     connect(tableWindow->tableWidget,&QTableWidget::itemDoubleClicked,[this,stackedWidget](QTableWidgetItem *item){itemDoubleClicked(item,stackedWidget);});
 
+
 }
 
 void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget *stackedWidget)
@@ -147,17 +148,22 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
         QString homeworkName=tableWindow2->tableWidget->item(row,0)->text();
         homeworkDoubleClicked(classId,homeworkName,stackedWidget,tableWindow2);
     });
+
+
 }
 
 void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
 {
     //选择了是哪次作业以后,显示学生的提交记录
     //界面切换
-    QStringList list3={"学号","提交日期","提交时间","分数"};
+    QStringList list3={"学号","姓名","提交日期","提交时间","分数"};
     TableWindow *tableWindow3=new TableWindow(list3);
-    QString sql=QString("SELECT student_id,d,t,score FROM homework_student "
-                          "WHERE class_id=%1 and "
-                          "name='%2';").arg(classId).arg(homeworkName);
+    QString sql=QString("SELECT homework_student.student_id,student.name,homework_student.d,"
+                          "homework_student.t,homework_student.score "
+                          "FROM homework_student "
+                          "JOIN student ON homework_student.student_id = student.student_id "
+                          "WHERE homework_student.class_id=%1 and "
+                          "homework_student.name='%2';").arg(classId).arg(homeworkName);
     tableWindow3->connectDataBase(sql);
     stackedWidget->addWidget(tableWindow3);
     stackedWidget->setCurrentIndex(2);
@@ -176,22 +182,35 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
     tableWindow3->leftLayout->addWidget(textEdit);
 
+    //search layout
+    //添加测试样例
+    QPushButton *exampleBtn=new QPushButton("添加测试样例");
+    tableWindow3->searchLayout->insertWidget(0,exampleBtn);
+    connect(exampleBtn,&QPushButton::clicked,[this,classId,homeworkName](){addExample(classId,homeworkName);});
+
     //选择了查看哪位学生的作业 double clicked
     connect(tableWindow3->tableWidget,&QTableWidget::itemDoubleClicked,[tableWindow3,classId,homeworkName,this,stackedWidget](QTableWidgetItem *item)
     {
         int row=item->row();
         QString studentId=tableWindow3->tableWidget->item(row,0)->text();
-        studentDoubleClicked(studentId,classId,homeworkName,stackedWidget,tableWindow3);
+        QString studentName=tableWindow3->tableWidget->item(row,1)->text();
+        studentDoubleClicked(studentName,studentId,classId,homeworkName,stackedWidget,tableWindow3);
     });
 }
 
-void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget,TableWindow *tableWindow3)
+void TeacherMainWindow::studentDoubleClicked(QString studentName,QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget,TableWindow *tableWindow3)
 {
     //选择了打开哪位学生的作业
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
     stackedWidget->setCurrentIndex(3);
     fileWindow->import(PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId));
+
+    //left layout
+    //介绍
+    QTextEdit *textEdit=new QTextEdit;
+    textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
+    fileWindow->leftLayout->insertWidget(1,textEdit);
 
     //分数栏
     QHBoxLayout *scoreLayout=new QHBoxLayout;
@@ -201,7 +220,7 @@ void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,Q
     scoreLayout->addWidget(score);
     scoreLayout->addWidget(scoreEdit);
     scoreLayout->addWidget(ensureScore);
-    fileWindow->leftLayout->addLayout(scoreLayout);
+    fileWindow->leftLayout->insertLayout(2,scoreLayout);
     connect(ensureScore,&QPushButton::clicked,[studentId,classId,homeworkName,scoreEdit]()
     {
         int score=scoreEdit->text().toInt();
@@ -214,7 +233,88 @@ void TeacherMainWindow::studentDoubleClicked(QString studentId,QString classId,Q
         query.exec(sql);
     });
 
-    //返回连接
+
+    //测试样例
+    //读入
+    QPlainTextEdit *exampleEdit=new QPlainTextEdit;
+    fileWindow->leftLayout->insertWidget(3,exampleEdit);
+    QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
+    if (!QFile::exists(fileName))
+    {
+        qDebug()<<"file not exist";
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file);
+        out << ""; // 写入文本
+        file.close();//创建txt文件
+    }
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly|QIODevice::Text);
+    QTextStream in(&file);
+    QString argument=in.readAll();
+    exampleEdit->setPlainText(argument);
+    file.close();
+
+
+    //process对话框
+    //编译运行
+    QPushButton *compile=new QPushButton("编译运行");
+    fileWindow->searchLayout->addWidget(compile);
+    QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
+    //输出框
+    // QPlainTextEdit *outputEdit=new QPlainTextEdit;
+    // fileWindow->leftLayout->insertWidget(4,outputEdit);
+    connect(compile,&QPushButton::clicked,[this,filePath,argument]()
+    {
+        QDir directory(filePath);
+        QStringList fileAll = directory.entryList(QDir::Files);
+        QStringList fileCompile;
+        for(auto fileName:fileAll)
+        {
+            if(fileName.contains(".cpp"))
+            {
+                fileCompile.push_back(fileName);
+            }
+        }
+        QProcess * process=new QProcess(this);
+        // 切换目录
+        process->setWorkingDirectory(filePath);
+        // 启动 g++ 命令
+        process->start("g++", QStringList()<<fileCompile<<"-o"<<"main");
+
+        if (!process->waitForFinished()) {
+            qDebug() << "Failed to execute g++ command.";
+            qDebug() << process->errorString(); // 输出错误信息
+        }
+        else
+        {
+            // 输出命令执行结果和错误信息
+            qDebug() << process->readAllStandardOutput();
+            qDebug() << process->readAllStandardError();
+        }
+
+        process->start(filePath+"/main.exe");
+
+        process->write(argument.toUtf8().constData());
+        process->closeWriteChannel(); // 关闭写通道，表示输入结束
+        if (!process->waitForFinished())
+        { // 等待程序执行完成
+        qDebug() << "Execution failed:" << process->errorString();
+        }
+
+        QByteArray output = process->readAllStandardOutput(); // 读取标准输出
+        QByteArray errorOutput = process->readAllStandardError(); // 读取错误输出
+        // outputEdit->setPlainText(QString::fromUtf8(output));
+        qDebug() << "Output:" << output;
+
+        if (!errorOutput.isEmpty())
+        {
+            qDebug() << "Error Output:" << errorOutput;
+        }
+    });
+
+
+    //返回
     connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow,tableWindow3]()
     {
         stackedWidget->setCurrentIndex(2);
@@ -294,3 +394,50 @@ void TeacherMainWindow::addHomework(QString classId, QString name, QString descr
     tableWindow2->tableWidget->setItem(row, 2, new QTableWidgetItem(date));
     tableWindow2->tableWidget->setItem(row, 3, new QTableWidgetItem(time));
 }
+
+void TeacherMainWindow::addExample(QString classId, QString homeworkName)
+{
+    QDialog *dialog=new QDialog;
+    QVBoxLayout *mainLayout=new QVBoxLayout;
+    dialog->setLayout(mainLayout);
+    QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
+
+    QLabel *label=new QLabel("请输入测试样例");
+    mainLayout->addWidget(label);
+
+    //写入
+    QPlainTextEdit *exampleEdit=new QPlainTextEdit;
+    mainLayout->addWidget(exampleEdit);
+    if (!QFile::exists(fileName))
+    {
+        qDebug()<<"file not exist";
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file);
+        out << ""; // 写入文本
+        file.close();//创建txt文件
+    }
+
+    //读入
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly|QIODevice::Text);
+    QTextStream in(&file);
+    exampleEdit->setPlainText(in.readAll());
+    file.close();
+
+    //写出
+    QPushButton *save=new QPushButton("保存");
+    mainLayout->addWidget(save);
+    connect(save,&QPushButton::clicked,[fileName,exampleEdit,dialog]()
+    {
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file);
+        out<<exampleEdit->toPlainText();
+        file.close();
+        dialog->close();
+    });
+    dialog->show();
+}
+
+
