@@ -166,9 +166,11 @@ void ClassTable::addClass(QString id, QString name, QString description)
 void ClassTable::showContextMenu(const QPoint &pos)
 {
     //菜单栏
-    QMenu contextMenu(tr("Context menu"), this);
     QTableWidgetItem *item=tableWidget->itemAt(pos);
-    int row=item->row();
+    if(item!=nullptr)
+    {
+        int row=item->row();
+    QMenu *contextMenu=new QMenu(tr("Context menu"), this);
     qDebug()<<"ClassTable::showContextMenu: row="<<row;
 
     //action1 删除此行
@@ -183,13 +185,14 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 QString sql=QString("delete from class where class_id=%1;").arg(id.toInt());
                 query_remove.exec(sql);
             });
-    contextMenu.addAction(action1);
+    contextMenu->addAction(action1);
 
     //action2 添加学生
     QAction *action2=new QAction("添加学生",this);
     connect(action2,&QAction::triggered,this,[this, row]()
     {
         QDialog *dialog=new QDialog;
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
         QVBoxLayout *layout=new QVBoxLayout;
         dialog->setLayout(layout);
         dialog->setWindowTitle("添加学生至课程");
@@ -208,13 +211,14 @@ void ClassTable::showContextMenu(const QPoint &pos)
         });
         dialog->show();
     });
-    contextMenu.addAction(action2);
+    contextMenu->addAction(action2);
 
     //添加教师
     QAction *action3=new QAction("添加教师",this);
     connect(action3,&QAction::triggered,this,[this, row]()
             {
                 QDialog *dialog=new QDialog;
+                dialog->setAttribute(Qt::WA_DeleteOnClose);
                 QVBoxLayout *layout=new QVBoxLayout;
                 dialog->setLayout(layout);
                 dialog->setWindowTitle("添加教师至课程");
@@ -234,7 +238,8 @@ void ClassTable::showContextMenu(const QPoint &pos)
                         });
                 dialog->show();
             });
-    contextMenu.addAction(action3);
+    contextMenu->addAction(action3);
 
-    contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
+    contextMenu->exec(tableWidget->mapToGlobal(pos));//阻塞
+    }
 }

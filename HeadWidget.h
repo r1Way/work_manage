@@ -7,6 +7,9 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QFont>
+#include <QSqlQuery>
+extern QString user_account;
+extern QString user_identity;
 class HeadWidget : public QWidget
 {
     Q_OBJECT

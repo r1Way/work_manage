@@ -167,9 +167,12 @@ void StudentTable::addStudent(const QString &id, const QString &name, const QStr
 void StudentTable::showContextMenu(const QPoint &pos)
 {
     //菜单栏
+    QTableWidgetItem *item=tableWidget->itemAt(pos);
+    if(item!=nullptr)
+    {
+
     QMenu contextMenu(tr("Context menu"), this);
 
-    QTableWidgetItem *item=tableWidget->itemAt(pos);
     int row=item->row();
     QAction * action1=new QAction("删除此行", this);
     connect(action1, &QAction::triggered, this, [this,row]()
@@ -185,6 +188,7 @@ void StudentTable::showContextMenu(const QPoint &pos)
     contextMenu.addAction(action1);
 
     contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
+    }
 }
 
 void StudentTable::editStudent(int row)

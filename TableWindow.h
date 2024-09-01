@@ -29,8 +29,8 @@ public:
     QString userName;
     QString password;
     QString selectFresh;
-    void fresh();
     TableWindow(QStringList information);
+    void fresh();
     void tableInit(QStringList information);//初始化列数以及各列名称
     void connectDataBase(QString tableName,QString driver="QODBC", QString hostName="127.0.0.1", QString databaseName="Mysql", QString userName="root", QString password="111111");//连接数据库
     void add(QStringList list);

@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QDir>
+#include <QSplitter>
 #include "StudentMainwindow.h"
 #include "BasicWindow.h"
 #include "FileWindow.h"
@@ -18,6 +19,7 @@
 QSqlDatabase db;
 QString user_account;
 QString PATH;
+QString user_identity;
 int main(int argc, char *argv[])
 {
     //获取当前路径
@@ -59,5 +61,6 @@ int main(int argc, char *argv[])
     }
     Login login;
     login.show();
+
     return a.exec();
 }

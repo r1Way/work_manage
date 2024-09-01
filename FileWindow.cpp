@@ -10,6 +10,7 @@ FileWindow::FileWindow()
     tabWidget=new QTabWidget;
     rightLayout->addWidget(tabWidget);
 
+
 }
 
 bool FileWindow::import(QString path)
@@ -29,12 +30,34 @@ bool FileWindow::import(QString path)
             QTextStream in(&file);
             QString content = in.readAll();
             file.close();
-            // 创建一个QTextEdit作为标签页的内容
-            QTextEdit *textEdit = new QTextEdit();
-            // 将QTextEdit添加到QTabWidget中
-            highlighter = new Highlighter(textEdit->document());
-            textEdit->setText(content);
-            tabWidget->addTab(textEdit, fileName);
+            // // 创建一个QTextEdit作为标签页的内容
+            CodeEditor *codeEdit=new CodeEditor();
+            // // 将QTextEdit添加到QTabWidget中
+            highlighter=new Highlighter(codeEdit->document());
+            codeEdit->setPlainText(content);
+            tabWidget->addTab(codeEdit,fileName);
+            connect(codeEdit,&CodeEditor::deliver,this,&FileWindow::wheelAll);
+        }
+    }
+}
+
+void FileWindow::wheelAll(QWheelEvent *e,CodeEditor *codeEdit)
+{
+    for (int i = 0; i < this->tabWidget->count(); ++i)
+    {
+        QWidget *widget = tabWidget->widget(i);
+        QPlainTextEdit *textEdit = qobject_cast<QPlainTextEdit*>(widget);
+        if (e->angleDelta().y()>  0)
+        { // If wheel scrolled up
+            QFont f = textEdit->font();
+            f.setPointSize(f.pointSize() + 1); // Increase font size
+            textEdit->setFont(f);
+        }
+        else if (e->angleDelta().y() < 0)
+        { // If wheel scrolled down
+            QFont f = textEdit->font();
+            f.setPointSize(f.pointSize() - 1); // Decrease font size
+            textEdit->setFont(f);
         }
     }
 }

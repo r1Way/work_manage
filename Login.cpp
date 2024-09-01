@@ -2,55 +2,130 @@
 
 Login::Login()
 {
-    // //身份信息
-    // this->identityType="";
+    //图片
     setWindowIcon(QIcon("://img/icopng"));
     setWindowTitle("C++作业管理系统");
-    QVBoxLayout * mainLayOut=new QVBoxLayout(this);
+    QHBoxLayout *backLayout=new QHBoxLayout(this);
+    QLabel *avatar = new QLabel(this);
+    QPixmap pix("://img/light.jpg");
+    avatar->setPixmap(pix.scaled(400, 400, Qt::KeepAspectRatio));
+    backLayout->addWidget(avatar);
+
+    //main layout
+    QVBoxLayout * mainLayOut=new QVBoxLayout;
+    backLayout->addLayout(mainLayOut);
+
+    // 创建标题标签
+    QLabel *titleLabel = new QLabel("C++作业管理系统");
+    titleLabel->setStyleSheet("font-size: 24px; font-weight: bold; font-family: 'Microsoft YaHei'; text-align: center;");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    mainLayOut->addWidget(titleLabel);
+
     // 创建三个按钮
-    QPushButton *teacherButton = new QPushButton("教师");
-    QPushButton *studentButton = new QPushButton("学生");
-    QPushButton *adminButton = new QPushButton("管理员");
+    btnVec.push_back(new QPushButton("教师"));
+    btnVec[0]->setStyleSheet("QPushButton {"
+                                "   border-radius: 10px;"         // 边框圆角半径
+                                "   background-color: #99d9df ;"   // 背景颜色
+                                "   padding: 5px;"               // 内边距
+                                "   color: black ;"               // 文本颜色
+                                " font-size: 15px;"
+                                "}"
+                                 "QPushButton:hover {"
+                                 "   background-color: #66cccc;"    // 鼠标悬停时的背景颜色
+                                 "}");
+    btnVec.push_back(new QPushButton("学生"));
+    btnVec[1]->setStyleSheet("QPushButton {"
+                                 "   border-radius: 10px;"         // 边框圆角半径
+                                 "   background-color: #99d9df ;"   // 背景颜色
+                                 "   padding: 5px;"               // 内边距
+                                 "   color: black;"               // 文本颜色
+                                 " font-size: 15px;"
+                                 "}"
+                                 "QPushButton:hover {"
+                                 "   background-color: #66cccc;"    // 鼠标悬停时的背景颜色
+                                 "}"
+                                 );
+    btnVec.push_back(new QPushButton("管理员"));
+    btnVec[2]->setStyleSheet("QPushButton {"
+                                 "   border-radius: 10px;"         // 边框圆角半径
+                                 "   background-color: #99d9df ;"   // 背景颜色
+                                 "   padding: 5px;"               // 内边距
+                                 "   color: black;"               // 文本颜色
+                                 " font-size: 15px;"
+                                 "}"
+                             "QPushButton:hover {"
+                             "   background-color: #66cccc;"    // 鼠标悬停时的背景颜色
+                             "}");
 
     // 创建水平布局来放置三个按钮
     QHBoxLayout *identityButton= new QHBoxLayout;
-    identityButton->addWidget(studentButton);
-    identityButton->addWidget(teacherButton);
-    identityButton->addWidget(adminButton);
+    for(int i=0;i<btnVec.size();i++)
+    {
+        identityButton->addWidget(btnVec[i]);
+    }
 
     // 创建账号标签和输入框
     QHBoxLayout *accountLayOut=new QHBoxLayout;
-    QLabel *accountLabel = new QLabel("账号:");
     accountInput = new QLineEdit();
-    accountLayOut->addWidget(accountLabel);
     accountLayOut->addWidget(accountInput);
     accountInput->setPlaceholderText("请输入账号");
+    accountInput->setStyleSheet("QLineEdit {"
+                               "   border-radius: 10px;"         // 边框圆角半径
+                               "   background-color: white ;"   // 背景颜色
+                               "   padding: 5px;"               // 内边距
+                               "   color: #9e9e9e;"               // 文本颜色
+                               " font-size: 15px;"
+                               "}");
 
 
     // 创建密码标签和输入框
     QHBoxLayout *passwordLayOut=new QHBoxLayout;
-    QLabel *passwordLabel = new QLabel("密码:");
     passwordInput = new QLineEdit();
     passwordInput->setEchoMode(QLineEdit::Password);  // 设置密码隐藏模式
-    passwordLayOut->addWidget(passwordLabel);
     passwordLayOut->addWidget(passwordInput);
     passwordInput->setPlaceholderText("请输入密码");
+    passwordInput->setStyleSheet("QLineEdit {"
+                                "   border-radius: 10px;"         // 边框圆角半径
+                                "   background-color: white ;"   // 背景颜色
+                                "   padding: 5px;"               // 内边距
+                                "   color: #9e9e9e;"               // 文本颜色
+                                " font-size: 15px;"
+                                "}");
 
 
     // 登录按钮
     QPushButton *logInButton=new QPushButton("登录");
+    logInButton->setStyleSheet("QPushButton {"
+
+                       "   border-radius: 10px;"         // 边框圆角半径
+                       "   background-color: #7cc261;"   // 背景颜色
+                       "   padding: 5px;"               // 内边距
+                       "   color: white;"               // 文本颜色
+                        " font-size: 18px;"
+                       "}");
 
     // 将按钮布局添加到主布局
     mainLayOut->addLayout(identityButton);
+    mainLayOut->addSpacing(15); // 这里设置间距
     mainLayOut->addLayout(accountLayOut);
+    mainLayOut->addSpacing(5); // 这里设置间距
     mainLayOut->addLayout(passwordLayOut);
+    mainLayOut->addSpacing(13); // 这里设置间距
     mainLayOut->addWidget(logInButton);
 
     //信号与槽
     connect(logInButton,&QPushButton::clicked,this,&Login::handleLogin);
-    connect(teacherButton,&QPushButton::clicked,this,&Login::selectTeacher);
-    connect(studentButton,&QPushButton::clicked,this,&Login::selectStudent);
-    connect(adminButton,&QPushButton::clicked,this,&Login::selectAdmin);
+    connect(btnVec[0],&QPushButton::clicked,this,&Login::selectTeacher);
+    connect(btnVec[1],&QPushButton::clicked,this,&Login::selectStudent);
+    connect(btnVec[2],&QPushButton::clicked,this,&Login::selectAdmin);
+
+    for(int i=0;i<btnVec.size();i++)
+    {
+        connect(btnVec[i],&QPushButton::clicked,[this,btn=btnVec[i]]()
+        {
+            pressColor(btn);
+        });
+    }
 }
 
 void Login::handleLogin()
@@ -93,6 +168,7 @@ void Login::handleLogin()
             if (identityType=="admin")
             {
                 ::user_account=accountInput->text();
+                ::user_identity="admin";
                 AdminMainWindow *window=new AdminMainWindow;
                 window->show();
             }
@@ -100,6 +176,7 @@ void Login::handleLogin()
             {
                 // ::user_account=accountInput->text();
                 ::user_account="113210";
+                ::user_identity="teacher";
                 TeacherMainWindow *window=new TeacherMainWindow;
                 window->show();
             }
@@ -107,6 +184,7 @@ void Login::handleLogin()
             {
                 // ::user_account=accountInput->text();
                 ::user_account="17514";
+                ::user_identity="student";
                 StudentMainwindow * window=new StudentMainwindow;
                 window->show();
             }
@@ -177,4 +255,29 @@ bool Login::correct(QString id, QString password)
     }
     qDebug()<<"Login::correct";
     return false;
+}
+
+void Login::pressColor(QPushButton *btn)
+{
+    btn->setStyleSheet("QPushButton {"
+                                "   border-radius: 10px;"         // 边框圆角半径
+                                "   background-color: #44aacc;"   // 背景颜色
+                                "   padding: 5px;"               // 内边距
+                                "   color: black ;"               // 文本颜色
+                                " font-size: 15px;"
+                       "}");
+
+    for(int i=0;i<btnVec.size();i++)
+    {
+        if(btnVec[i]!=btn)
+        {
+            btnVec[i]->setStyleSheet("QPushButton {"
+                                "   border-radius: 10px;"         // 边框圆角半径
+                                "   background-color: #99d9df ;"   // 背景颜色
+                                "   padding: 5px;"               // 内边距
+                                "   color: black ;"               // 文本颜色
+                                " font-size: 15px;"
+                                "}");
+        }
+    }
 }

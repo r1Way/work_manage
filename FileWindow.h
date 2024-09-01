@@ -8,8 +8,11 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QDir>
+#include <QPlainTextEdit>
+#include <QWheelEvent>
 #include "BasicWindow.h"
 #include "Highlighter.h"
+#include "CodeEditor.h"
 class FileWindow:public BasicWindow
 {
 public:
@@ -18,7 +21,8 @@ public:
     QTabWidget *tabWidget;
     Highlighter * highlighter;
     QPushButton *returnBtn;
-
+signals:
+    void wheelAll(QWheelEvent *e,CodeEditor *codeEdit);
 };
 
 #endif // FILEWINDOW_H

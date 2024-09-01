@@ -12,11 +12,13 @@
 #include <QSqlDatabase>
 #include <QSqlRecord>
 #include <QIcon>
+#include <QVector>
 #include "AdminMainwindow.h"
 #include "TeacherMainwindow.h"
 #include "StudentMainwindow.h"
 extern QString user_account;
 extern QSqlDatabase db;
+extern QString user_identity;
 class Login : public QDialog
 {
 public:
@@ -30,7 +32,10 @@ private:
     QLineEdit *accountInput;
     QLineEdit *passwordInput;
     QString identityType;
+    QVector<QPushButton*> btnVec;
     bool correct(QString id,QString password);
+public slots:
+    void pressColor(QPushButton * btn);
 };
 
 #endif // LOGIN_H

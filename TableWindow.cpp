@@ -1,23 +1,11 @@
 #include "TableWindow.h"
 
-void TableWindow::fresh()
-{
-    tableWidget->setRowCount(0);
-    QSqlQuery query;
-    query.exec(selectFresh);
-    while (query.next())
-    {
-        QStringList list;
-        for(int i=0;i<information.size();i++)
-        {
-            list.append(query.value(i).toString());
-        }
-        add(list);
-    }
-}
-
 TableWindow::TableWindow(QStringList information)
 {
+    //search layout
+    QSpacerItem *spacerItem=new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    searchLayout->addSpacerItem(spacerItem);
+
     //line edit
     searchEdit=new QLineEdit;
     searchLayout->addWidget(searchEdit);
@@ -39,6 +27,24 @@ TableWindow::TableWindow(QStringList information)
     scrollArea->setWidgetResizable(true); // 让 QTableWidget 随着 QScrollArea 的大小变化
     rightLayout->addWidget(scrollArea);//不可删掉这一行
 }
+
+void TableWindow::fresh()
+{
+    tableWidget->setRowCount(0);
+    QSqlQuery query;
+    query.exec(selectFresh);
+    while (query.next())
+    {
+        QStringList list;
+        for(int i=0;i<information.size();i++)
+        {
+            list.append(query.value(i).toString());
+        }
+        add(list);
+    }
+}
+
+
 
 void TableWindow::tableInit(QStringList information)
 {
