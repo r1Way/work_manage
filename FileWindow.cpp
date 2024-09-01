@@ -6,9 +6,6 @@ FileWindow::FileWindow()
     returnBtn=new QPushButton("返回");
     this->leftLayout->addWidget(returnBtn);
 
-    QTextEdit *leftTextEdit=new QTextEdit;
-    this->leftLayout->addWidget(leftTextEdit);
-
     //right layout
     tabWidget=new QTabWidget;
     rightLayout->addWidget(tabWidget);

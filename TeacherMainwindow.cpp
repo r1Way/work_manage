@@ -262,9 +262,9 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     fileWindow->searchLayout->addWidget(compile);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
     //输出框
-    // QPlainTextEdit *outputEdit=new QPlainTextEdit;
-    // fileWindow->leftLayout->insertWidget(4,outputEdit);
-    connect(compile,&QPushButton::clicked,[this,filePath,argument]()
+    QPlainTextEdit *outputEdit=new QPlainTextEdit;
+    fileWindow->leftLayout->insertWidget(4,outputEdit);
+    connect(compile,&QPushButton::clicked,[this,filePath,argument,outputEdit]()
     {
         QDir directory(filePath);
         QStringList fileAll = directory.entryList(QDir::Files);
@@ -304,7 +304,7 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
         QByteArray output = process->readAllStandardOutput(); // 读取标准输出
         QByteArray errorOutput = process->readAllStandardError(); // 读取错误输出
-        // outputEdit->setPlainText(QString::fromUtf8(output));
+        outputEdit->appendPlainText(QString::fromUtf8(output));
         qDebug() << "Output:" << output;
 
         if (!errorOutput.isEmpty())
