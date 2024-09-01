@@ -23,6 +23,7 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     mainLayout->addWidget(stackedWidget);
     QStringList list={"课程代号","课程名称","描述"};
     tableWindow=new TableWindow(list);
+    tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
     // qDebug()<<"front"<<user_account<<"back";//check
     QString sql=QString("SELECT class.class_id,class.name,class.description from class "
                           "JOIN class_teacher ON class.class_id=class_teacher.class_id "
@@ -210,17 +211,20 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     //介绍
     QTextEdit *textEdit=new QTextEdit;
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
-    fileWindow->leftLayout->insertWidget(1,textEdit);
+    fileWindow->leftSplitter->addWidget(textEdit);
+    // fileWindow->leftLayout->insertWidget(1,textEdit);
 
     //分数栏
-    QHBoxLayout *scoreLayout=new QHBoxLayout;
+    QWidget *scoreWidget=new QWidget;
+    QHBoxLayout *scoreLayout=new QHBoxLayout(scoreWidget);
     QLabel *score=new QLabel("分数");
     QLineEdit *scoreEdit=new QLineEdit;
     QPushButton *ensureScore=new QPushButton("确定");
     scoreLayout->addWidget(score);
     scoreLayout->addWidget(scoreEdit);
     scoreLayout->addWidget(ensureScore);
-    fileWindow->leftLayout->insertLayout(2,scoreLayout);
+    fileWindow->leftSplitter->addWidget(scoreWidget);
+    // fileWindow->leftLayout->insertLayout(2,scoreLayout);
     connect(ensureScore,&QPushButton::clicked,[studentId,classId,homeworkName,scoreEdit]()
     {
         int score=scoreEdit->text().toInt();
@@ -237,7 +241,8 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     //测试样例
     //读入
     QPlainTextEdit *exampleEdit=new QPlainTextEdit;
-    fileWindow->leftLayout->insertWidget(3,exampleEdit);
+    fileWindow->leftSplitter->addWidget(exampleEdit);
+    // fileWindow->leftLyout->insertWidget(3,exampleEdit);
     QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
     if (!QFile::exists(fileName))
     {
@@ -263,7 +268,8 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
     //输出框
     QPlainTextEdit *outputEdit=new QPlainTextEdit;
-    fileWindow->leftLayout->insertWidget(4,outputEdit);
+    // fileWindow->leftLayout->insertWidget(4,outputEdit);
+    fileWindow->leftSplitter->addWidget(outputEdit);
     connect(compile,&QPushButton::clicked,[this,filePath,argument,outputEdit]()
     {
         QDir directory(filePath);

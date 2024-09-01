@@ -24,6 +24,7 @@ StudentMainwindow::StudentMainwindow(QWidget *parent)
     mainLayout->addWidget(stackedWidget);
     QStringList list1={"课程代号","课程名称","描述"};
     tableWindow=new TableWindow(list1);
+    tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
     tableWindow->connectDataBase(QString("SELECT class.class_id,class.name,class.description FROM class "
                                  "JOIN class_student ON class.class_id=class_student.class_id "
                                          "WHERE class_student.student_id=%1").arg(user_account));

@@ -4,12 +4,12 @@ FileWindow::FileWindow()
 {
     //left layout
     returnBtn=new QPushButton("返回");
-    this->leftLayout->addWidget(returnBtn);
+    this->leftSplitter->addWidget(returnBtn);
+    // this->leftLayout->addWidget(returnBtn);
 
     //right layout
     tabWidget=new QTabWidget;
     rightLayout->addWidget(tabWidget);
-
 
 }
 
