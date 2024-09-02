@@ -2,13 +2,18 @@
 
 FileWindow::FileWindow()
 {
+    QFont font;
+    font.setPointSize(14);
+
     //left layout
     returnBtn=new QPushButton("返回");
+    returnBtn->setFont(font);
     this->leftSplitter->addWidget(returnBtn);
     // this->leftLayout->addWidget(returnBtn);
 
     //right layout
     tabWidget=new QTabWidget;
+    tabWidget->setStyleSheet("QTabBar::tab { font-size: 13pt; }");
     rightLayout->addWidget(tabWidget);
 
 }

@@ -3,6 +3,9 @@
 #include "CodeEditor.h"
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
+    QFont font;
+    font.setPointSize(12);
+    this->setFont(font);
     lineNumberArea = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);

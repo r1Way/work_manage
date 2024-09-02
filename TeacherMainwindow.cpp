@@ -37,6 +37,8 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
 
 void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget *stackedWidget)
 {
+    QFont font;
+    font.setPointSize(14);
     //选择班级以后
     int row=item->row();
     QString classId=tableWindow->tableWidget->item(row,0)->text();//获取班级id
@@ -50,7 +52,10 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     stackedWidget->setCurrentIndex(1);
 
     //left layout
+
     QPushButton *returnBtn=new QPushButton("返回");
+    returnBtn->setFont(font);
+
     connect(returnBtn,&QPushButton::clicked,[stackedWidget,tableWindow2]()
     {
         stackedWidget->setCurrentIndex(0);
@@ -73,16 +78,16 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
         className=query.value(0).toString();
         description=query.value(1).toString();
     }
-
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>描述</b>：%2").arg(className).arg(description));
     tableWindow2->leftLayout->addWidget(labelEdit);
 
     //search layout
     //批量删除batchBtn
     QPushButton *batchBtn=new QPushButton("批量删除");
+    batchBtn->setFont(font);
     tableWindow2->searchLayout->insertWidget(0,batchBtn);
 
-    connect(batchBtn,&QPushButton::clicked,this,[tableWindow2,this,batchBtn,classId]()
+    connect(batchBtn,&QPushButton::clicked,this,[tableWindow2,this,batchBtn,classId,font]()
     {
 
         int cols=tableWindow2->tableWidget->columnCount();//未添加复选框时的列数
@@ -92,6 +97,8 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
             //复选框配置
             tableWindow2->tableWidget->insertColumn(cols);//增加新的一列
             ensureBatch=new QPushButton("确认删除");
+            ensureBatch->setFont(font);
+
             for (int i = 0; i < tableWindow2->tableWidget->rowCount(); ++i)
             {
                 //在最后一列添加复选框
@@ -142,6 +149,7 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     });
 
     QPushButton *assignBtn=new QPushButton("布置作业");
+    assignBtn->setFont(font);
     tableWindow2->searchLayout->insertWidget(0,assignBtn);
     connect(assignBtn,&QPushButton::clicked,[this,classId,tableWindow2](){assignHomework(classId,tableWindow2);});
 
@@ -158,6 +166,8 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
 
 void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
 {
+    QFont font;
+    font.setPointSize(14);
     //选择了是哪次作业以后,显示学生的提交记录
     //界面切换
     QStringList list3={"学号","姓名","提交日期","提交时间","分数"};
@@ -174,6 +184,7 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
 
     //left layout
     QPushButton *returnBtn=new QPushButton("返回");
+    returnBtn->setFont(font);
     tableWindow3->leftLayout->addWidget(returnBtn);
     connect(returnBtn,&QPushButton::clicked,[stackedWidget,tableWindow3]()
     {
@@ -192,6 +203,7 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     //search layout
     //添加测试样例
     QPushButton *exampleBtn=new QPushButton("添加测试样例");
+    exampleBtn->setFont(font);
     tableWindow3->searchLayout->insertWidget(0,exampleBtn);
     connect(exampleBtn,&QPushButton::clicked,[this,classId,homeworkName](){addExample(classId,homeworkName);});
 
@@ -207,6 +219,8 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
 
 void TeacherMainWindow::studentDoubleClicked(QString studentName,QString studentId,QString classId,QString homeworkName,QStackedWidget *stackedWidget,TableWindow *tableWindow3)
 {
+    QFont font;
+    font.setPointSize(14);
     //选择了打开哪位学生的作业
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
@@ -229,6 +243,9 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QLabel *score=new QLabel("分数");
     QLineEdit *scoreEdit=new QLineEdit;
     QPushButton *ensureScore=new QPushButton("确定");
+    QFont temp=ensureScore->font();
+    temp.setPointSize(11);
+    ensureScore->setFont(temp);
     scoreLayout->addWidget(score);
     scoreLayout->addWidget(scoreEdit);
     scoreLayout->addWidget(ensureScore);
@@ -250,8 +267,11 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     //测试样例
     //读入
     LabelEdit *labelEditInput=new LabelEdit;
+    QFont fontInput;
+    fontInput.setPointSize(12);
     labelEditInput->label->setText("样例输入");
     QPlainTextEdit *exampleEdit=new QPlainTextEdit;
+    exampleEdit->setFont(fontInput);
     labelEditInput->mainLayout->addWidget(exampleEdit);
     fileWindow->leftSplitter->addWidget(labelEditInput);
     QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
@@ -267,25 +287,44 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QFile file(fileName);
     file.open(QIODevice::ReadOnly|QIODevice::Text);
     QTextStream in(&file);
-    QString argument=in.readAll();
+    QString argument=in.readAll();//读入的参数
     exampleEdit->setPlainText(argument);
     file.close();
-
+    QPushButton *resetBtn=new QPushButton;//重置测试样例
+    resetBtn->setIcon(QIcon("://img/reset.png"));
+    resetBtn->setStyleSheet("QPushButton {"
+                             "background-color: #eeeeee;"
+                            "}"
+                            "QPushButton:hover "
+                            "{"
+                            "background-color: #cdcdcd ;" /* 鼠标悬停时的背景颜色 */
+                            "}"
+                            "QPushButton:pressed {"
+                            "background-color: #a9a9a9;" /* 按下时的背景颜色 */
+                            "}");
+    resetBtn->setFixedSize(20,20);
+    connect(resetBtn,&QPushButton::clicked,[argument,exampleEdit]()
+    {
+        exampleEdit->setPlainText(argument);
+    });
+    labelEditInput->addUp(resetBtn);
 
     //process对话框
     //编译运行
     QPushButton *compile=new QPushButton("编译运行");
+    compile->setToolTip("F5");
+    compile->setFont(font);
     fileWindow->searchLayout->addWidget(compile);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
 
     //输出框
-
     LabelEdit *labelEditOutput=new LabelEdit;
     labelEditOutput->label->setText("程序输出信息");
     CodeEditor *outputEdit=new CodeEditor;
     labelEditOutput->mainLayout->addWidget(outputEdit);
     fileWindow->leftSplitter->addWidget(labelEditOutput);
-    connect(compile,&QPushButton::clicked,[this,filePath,argument,outputEdit]()
+    compile->setShortcut(QKeySequence("F5"));
+    connect(compile,&QPushButton::clicked,[this,filePath,exampleEdit,outputEdit]()
     {
         QDir directory(filePath);
         QStringList fileAll = directory.entryList(QDir::Files);
@@ -315,7 +354,7 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
         }
 
         process->start(filePath+"/main.exe");
-
+        QString argument=exampleEdit->toPlainText();
         process->write(argument.toUtf8().constData());
         process->closeWriteChannel(); // 关闭写通道，表示输入结束
         if (!process->waitForFinished())
@@ -343,6 +382,7 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
         fileWindow->deleteLater();
         tableWindow3->fresh();
     });
+
 }
 
 void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2)

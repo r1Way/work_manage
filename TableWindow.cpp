@@ -2,6 +2,9 @@
 
 TableWindow::TableWindow(QStringList information)
 {
+    QFont font;
+    font.setPointSize(14);
+
     //search layout
     QSpacerItem *spacerItem=new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
     searchLayout->addSpacerItem(spacerItem);
@@ -12,6 +15,7 @@ TableWindow::TableWindow(QStringList information)
 
     //search btn
     searchBtn=new QPushButton("搜索");
+    searchBtn->setFont(font);
     connect(searchBtn,&QPushButton::clicked,[this](){search(searchEdit->text());});
     connect(searchEdit,&QLineEdit::returnPressed,this,[this](){searchBtn->click();});//搜索框内回车与搜索键绑定
     searchLayout->addWidget(searchBtn);
@@ -52,6 +56,9 @@ void TableWindow::tableInit(QStringList information)
     tableWidget->setColumnCount(information.size());  // 设置列数
     tableWidget->setHorizontalHeaderLabels(information); //设置各列的名称
     tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    QFont font;
+    font.setPointSize(13);
+    tableWidget->setFont(font);
 }
 
 void TableWindow::connectDataBase(QString select,QString driver,QString hostName,QString databaseName,QString userName,QString password)

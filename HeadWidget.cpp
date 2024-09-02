@@ -3,6 +3,7 @@
 HeadWidget::HeadWidget(QWidget *parent)
     : QWidget{parent}
 {
+    // this->setStyleSheet("QWidget {background-color: #61d4df; }");
     //调节大小
     QFont *font=new QFont;
     font->setPointSize(25);
