@@ -24,6 +24,7 @@
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"
+#include "LabelEdit.h"
 extern QString user_account;
 extern QSqlDatabase db;
 extern QString PATH;

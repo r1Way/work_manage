@@ -60,9 +60,12 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
         tableWindow2->deleteLater();
     });
     tableWindow2->leftLayout->addWidget(returnBtn);
+    LabelEdit *labelEdit=new LabelEdit;
+    labelEdit->setText("基本信息");
     QTextEdit *textEdit=new QTextEdit;
+    labelEdit->addDown(textEdit);
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节");
-    tableWindow2->leftLayout->addWidget(textEdit);
+    tableWindow2->leftLayout->addWidget(labelEdit);
 
     //search layout
 

@@ -15,6 +15,7 @@
 #include "AdminMainwindow.h"
 #include "StudentTable.h"
 #include "TeacherTable.h"
+#include "LabelEdit.h"
 
 QSqlDatabase db;
 QString user_account;
@@ -61,6 +62,8 @@ int main(int argc, char *argv[])
     }
     Login login;
     login.show();
+    // LabelEdit edit;
+    // edit.show();
 
     return a.exec();
 }

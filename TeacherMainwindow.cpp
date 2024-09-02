@@ -60,6 +60,9 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     });
     tableWindow2->leftLayout->addWidget(returnBtn);
     QTextEdit *textEdit=new QTextEdit;
+    LabelEdit *labelEdit=new LabelEdit;
+    labelEdit->mainLayout->addWidget(textEdit);
+    labelEdit->label->setText("基本信息");
 
     QSqlQuery query;//获取班级名
     query.exec(QString("SELECT name,description FROM class WHERE class_id=%1").arg(classId));
@@ -72,7 +75,7 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     }
 
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>描述</b>：%2").arg(className).arg(description));
-    tableWindow2->leftLayout->addWidget(textEdit);
+    tableWindow2->leftLayout->addWidget(labelEdit);
 
     //search layout
     //批量删除batchBtn
@@ -179,9 +182,12 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
         tableWindow3->deleteLater();
     });
 
+    LabelEdit *labelEdit=new LabelEdit;
+    labelEdit->label->setText("基本信息");
     QTextEdit *textEdit=new QTextEdit;
+    labelEdit->mainLayout->addWidget(textEdit);
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
-    tableWindow3->leftLayout->addWidget(textEdit);
+    tableWindow3->leftLayout->addWidget(labelEdit);
 
     //search layout
     //添加测试样例
@@ -209,10 +215,13 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
     //left layout
     //介绍
+    LabelEdit *labelEditIntro=new LabelEdit;
+    labelEditIntro->label->setText("基本信息");
+
     QTextEdit *textEdit=new QTextEdit;
+    labelEditIntro->mainLayout->addWidget(textEdit);
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
-    fileWindow->leftSplitter->addWidget(textEdit);
-    // fileWindow->leftLayout->insertWidget(1,textEdit);
+    fileWindow->leftSplitter->addWidget(labelEditIntro);
 
     //分数栏
     QWidget *scoreWidget=new QWidget;
@@ -240,9 +249,11 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
     //测试样例
     //读入
+    LabelEdit *labelEditInput=new LabelEdit;
+    labelEditInput->label->setText("样例输入");
     QPlainTextEdit *exampleEdit=new QPlainTextEdit;
-    fileWindow->leftSplitter->addWidget(exampleEdit);
-    // fileWindow->leftLyout->insertWidget(3,exampleEdit);
+    labelEditInput->mainLayout->addWidget(exampleEdit);
+    fileWindow->leftSplitter->addWidget(labelEditInput);
     QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
     if (!QFile::exists(fileName))
     {
@@ -266,10 +277,14 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QPushButton *compile=new QPushButton("编译运行");
     fileWindow->searchLayout->addWidget(compile);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
+
     //输出框
-    QPlainTextEdit *outputEdit=new QPlainTextEdit;
-    // fileWindow->leftLayout->insertWidget(4,outputEdit);
-    fileWindow->leftSplitter->addWidget(outputEdit);
+
+    LabelEdit *labelEditOutput=new LabelEdit;
+    labelEditOutput->label->setText("程序输出信息");
+    CodeEditor *outputEdit=new CodeEditor;
+    labelEditOutput->mainLayout->addWidget(outputEdit);
+    fileWindow->leftSplitter->addWidget(labelEditOutput);
     connect(compile,&QPushButton::clicked,[this,filePath,argument,outputEdit]()
     {
         QDir directory(filePath);
