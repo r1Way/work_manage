@@ -22,6 +22,8 @@ TableWindow::TableWindow(QStringList information)
 
     //table
     tableWidget=new QTableWidget;
+    tableWidget->setSortingEnabled(true);//启用排序功能
+    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);//不允许编辑
     rightLayout->addWidget(tableWidget);
     tableInit(information);
 

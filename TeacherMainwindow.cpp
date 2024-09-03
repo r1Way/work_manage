@@ -312,7 +312,8 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     //process对话框
     //编译运行
     QPushButton *compile=new QPushButton("编译运行");
-    compile->setToolTip("F5");
+    compile->setToolTip("F5");//设置press信息
+    compile->setShortcut(QKeySequence("F5"));//设置快捷键
     compile->setFont(font);
     fileWindow->searchLayout->addWidget(compile);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(studentId);
@@ -323,7 +324,6 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     CodeEditor *outputEdit=new CodeEditor;
     labelEditOutput->mainLayout->addWidget(outputEdit);
     fileWindow->leftSplitter->addWidget(labelEditOutput);
-    compile->setShortcut(QKeySequence("F5"));
     connect(compile,&QPushButton::clicked,[this,filePath,exampleEdit,outputEdit]()
     {
         QDir directory(filePath);

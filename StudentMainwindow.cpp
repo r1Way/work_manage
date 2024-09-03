@@ -41,6 +41,9 @@ StudentMainwindow::StudentMainwindow(QWidget *parent)
 
 void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stackedWidget)
 {
+    QFont font;
+    font.setPointSize(14);
+
     //选择完班级以后，显示作业
     QStringList list2={"作业名称","作业介绍","截止日期","截止时间"};
     TableWindow *tableWindow2=new TableWindow(list2);
@@ -52,6 +55,8 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
 
     //left layout
     QPushButton *returnBtn=new QPushButton("返回");
+    returnBtn->setFont(font);
+
     //返回
     connect(returnBtn,&QPushButton::clicked,[stackedWidget,tableWindow2]()
     {
@@ -80,12 +85,74 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
 
 void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget)
 {
+    QFont font;
+    font.setPointSize(14);
+
     //已选择是何次作业
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
     fileWindow->import(filePath);
     stackedWidget->setCurrentIndex(2);
+
+    //left layout
+    //介绍
+    LabelEdit *labelEditIntro=new LabelEdit;
+    labelEditIntro->label->setText("基本信息");
+
+    QTextEdit *textEdit=new QTextEdit;
+    labelEditIntro->mainLayout->addWidget(textEdit);
+    textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br>").arg(classId).arg(homeworkName));
+    fileWindow->leftSplitter->addWidget(labelEditIntro);
+
+    //测试样例
+    //读入
+    LabelEdit *labelEditInput=new LabelEdit;
+    QFont fontInput;
+    fontInput.setPointSize(12);
+    labelEditInput->label->setText("样例输入");
+    QPlainTextEdit *exampleEdit=new QPlainTextEdit;
+    exampleEdit->setFont(fontInput);
+    labelEditInput->mainLayout->addWidget(exampleEdit);
+    fileWindow->leftSplitter->addWidget(labelEditInput);
+    QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
+    if (!QFile::exists(fileName))
+    {
+        qDebug()<<"file not exist";
+        QFile file(fileName);
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+        QTextStream out(&file);
+        out << ""; // 写入文本
+        file.close();//创建txt文件
+    }
+
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly|QIODevice::Text);
+    QTextStream in(&file);
+    QString argument=in.readAll();//读入的参数
+    exampleEdit->setPlainText(argument);
+    file.close();
+    QPushButton *resetBtn=new QPushButton;//重置测试样例
+    resetBtn->setFont(font);
+    resetBtn->setIcon(QIcon("://img/reset.png"));
+    resetBtn->setStyleSheet("QPushButton {"
+                             "background-color: #eeeeee;"
+                            "}"
+                            "QPushButton:hover "
+                            "{"
+                            "background-color: #cdcdcd ;" /* 鼠标悬停时的背景颜色 */
+                            "}"
+                            "QPushButton:pressed {"
+                            "background-color: #a9a9a9;" /* 按下时的背景颜色 */
+                            "}");
+    resetBtn->setFixedSize(20,20);
+    connect(resetBtn,&QPushButton::clicked,[argument,exampleEdit]()
+    {
+        exampleEdit->setPlainText(argument);
+    });
+    labelEditInput->addUp(resetBtn);
+
+
 
     //返回
     connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow]()
@@ -95,9 +162,11 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
         fileWindow->deleteLater();
     });
 
+
     //search layout
     //提交作业
     QPushButton *handInHomework=new QPushButton("提交作业");
+    handInHomework->setFont(font);
     fileWindow->searchLayout->insertWidget(0,handInHomework);
     connect(handInHomework,&QPushButton::clicked,[this,classId,homeworkName]()
     {
@@ -107,6 +176,10 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     //search layout
     //编译运行
     QPushButton *compile=new QPushButton("编译运行");
+    compile->setFont(font);
+    compile->setToolTip("F5");//设置press信息
+    compile->setShortcut(QKeySequence("F5"));//设置快捷键
+
     fileWindow->searchLayout->addWidget(compile);
     connect(compile,&QPushButton::clicked,[this,filePath]()
     {
@@ -158,6 +231,63 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
             qDebug() << "Error Output:" << errorOutput;
         }
     });
+
+    //输出框
+    LabelEdit *labelEditOutput=new LabelEdit;
+    labelEditOutput->label->setText("程序输出信息");
+    CodeEditor *outputEdit=new CodeEditor;
+    labelEditOutput->mainLayout->addWidget(outputEdit);
+    fileWindow->leftSplitter->addWidget(labelEditOutput);
+    compile->setShortcut(QKeySequence("F5"));
+    connect(compile,&QPushButton::clicked,[this,filePath,exampleEdit,outputEdit]()
+    {
+        QDir directory(filePath);
+        QStringList fileAll = directory.entryList(QDir::Files);
+        QStringList fileCompile;
+        for(auto fileName:fileAll)
+        {
+            if(fileName.contains(".cpp"))
+            {
+                fileCompile.push_back(fileName);
+            }
+        }
+        QProcess * process=new QProcess(this);
+        // 切换目录
+        process->setWorkingDirectory(filePath);
+        // 启动 g++ 命令
+        process->start("g++", QStringList()<<fileCompile<<"-o"<<"main");
+
+        if (!process->waitForFinished()) {
+            qDebug() << "Failed to execute g++ command.";
+            qDebug() << process->errorString(); // 输出错误信息
+        }
+        else
+        {
+            // 输出命令执行结果和错误信息
+            qDebug() << process->readAllStandardOutput();
+            qDebug() << process->readAllStandardError();
+        }
+
+        process->start(filePath+"/main.exe");
+        QString argument=exampleEdit->toPlainText();
+        process->write(argument.toUtf8().constData());
+        process->closeWriteChannel(); // 关闭写通道，表示输入结束
+        if (!process->waitForFinished())
+        { // 等待程序执行完成
+        qDebug() << "Execution failed:" << process->errorString();
+        }
+
+        QByteArray output = process->readAllStandardOutput(); // 读取标准输出
+        QByteArray errorOutput = process->readAllStandardError(); // 读取错误输出
+        outputEdit->appendPlainText(QString::fromUtf8(output));
+        qDebug() << "Output:" << output;
+
+        if (!errorOutput.isEmpty())
+        {
+            qDebug() << "Error Output:" << errorOutput;
+        }
+    });
+
 }
 
 void StudentMainwindow::handIn(QString classId, QString homeworkName)

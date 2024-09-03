@@ -39,7 +39,7 @@ MyTableWidget::MyTableWidget(){
 
     //table
     tableWidget = new QTableWidget;
-    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);//不允许编辑
     mainLayout->addWidget(tableWidget);//挂在layout上
     tableWidget->setSortingEnabled(true);// 启用表头的排序功能
     font->setPointSize(13);
