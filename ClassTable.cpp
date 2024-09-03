@@ -19,6 +19,9 @@ ClassTable::ClassTable()
         search(searchEdit->text());
     });
 
+    //searchEdit
+    searchEdit->setPlaceholderText("输入课程编号，名称，描述以筛选");
+
     //鼠标右键菜单
     connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &ClassTable::showContextMenu);
 

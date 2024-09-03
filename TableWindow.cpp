@@ -10,7 +10,9 @@ TableWindow::TableWindow(QStringList information)
     searchLayout->addSpacerItem(spacerItem);
 
     //line edit
+    //searchEdit
     searchEdit=new QLineEdit;
+    searchEdit->setFont(font);
     searchLayout->addWidget(searchEdit);
 
     //search btn

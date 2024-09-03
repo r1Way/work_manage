@@ -20,7 +20,6 @@ MyTableWidget::MyTableWidget(){
     QSpacerItem *spacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
     searchEdit=new QLineEdit;
-    searchEdit->setPlaceholderText("输入姓名、学号或专业进行搜索...");
     searchEdit->setFont(*font);
     connect(searchEdit,&QLineEdit::returnPressed,this,[this](){searchBtn->click();});//搜索框内回车与搜索键绑定
 

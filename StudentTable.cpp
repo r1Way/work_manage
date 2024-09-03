@@ -20,6 +20,9 @@ StudentTable::StudentTable():MyTableWidget()
         search(searchEdit->text());
     });
 
+    //searchEdit
+    searchEdit->setPlaceholderText("输入学号，姓名，专业以筛选");
+
     //鼠标右键菜单
     connect(tableWidget, &QTableWidget::customContextMenuRequested, this, &StudentTable::showContextMenu);
 

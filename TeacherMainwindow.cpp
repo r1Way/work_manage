@@ -23,6 +23,7 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     mainLayout->addWidget(stackedWidget);
     QStringList list={"课程代号","课程名称","描述"};
     tableWindow=new TableWindow(list);
+    tableWindow->searchEdit->setPlaceholderText("输入课程代号、名称、描述以筛选");//设置edit
     tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
     // qDebug()<<"front"<<user_account<<"back";//check
     QString sql=QString("SELECT class.class_id,class.name,class.description from class "
@@ -48,6 +49,7 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
                           "d,t FROM homework_class "
                           "WHERE class_id=%1;").arg(classId);
     tableWindow2->connectDataBase(sql);
+    tableWindow2->searchEdit->setPlaceholderText("输入作业名称、介绍、日期、时间以筛选");//设置edit
     stackedWidget->addWidget(tableWindow2);
     stackedWidget->setCurrentIndex(1);
 
@@ -79,6 +81,11 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
         description=query.value(1).toString();
     }
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>描述</b>：%2").arg(className).arg(description));
+    textEdit->setReadOnly(true);
+    QFont fontTemp;
+    fontTemp.setPointSize(12);
+    textEdit->setFont(fontTemp);
+
     tableWindow2->leftLayout->addWidget(labelEdit);
 
     //search layout
@@ -179,6 +186,7 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
                           "WHERE homework_student.class_id=%1 and "
                           "homework_student.name='%2';").arg(classId).arg(homeworkName);
     tableWindow3->connectDataBase(sql);
+    tableWindow3->searchEdit->setPlaceholderText("输入学号、姓名、日期、时间分数以筛选");//设置edit
     stackedWidget->addWidget(tableWindow3);
     stackedWidget->setCurrentIndex(2);
 
@@ -198,6 +206,11 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     QTextEdit *textEdit=new QTextEdit;
     labelEdit->mainLayout->addWidget(textEdit);
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
+    textEdit->setReadOnly(true);
+    QFont fontTemp;
+    fontTemp.setPointSize(12);
+    textEdit->setFont(fontTemp);
+
     tableWindow3->leftLayout->addWidget(labelEdit);
 
     //search layout
@@ -235,6 +248,10 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QTextEdit *textEdit=new QTextEdit;
     labelEditIntro->mainLayout->addWidget(textEdit);
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
+    textEdit->setReadOnly(true);
+    QFont fontTemp;
+    fontTemp.setPointSize(12);
+    textEdit->setFont(fontTemp);
     fileWindow->leftSplitter->addWidget(labelEditIntro);
 
     //分数栏

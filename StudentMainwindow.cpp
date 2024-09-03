@@ -24,6 +24,7 @@ StudentMainwindow::StudentMainwindow(QWidget *parent)
     mainLayout->addWidget(stackedWidget);
     QStringList list1={"课程代号","课程名称","描述"};
     tableWindow=new TableWindow(list1);
+    tableWindow->searchEdit->setPlaceholderText("输入课程代号、名称、描述以筛选");//设置edit
     tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
     tableWindow->connectDataBase(QString("SELECT class.class_id,class.name,class.description FROM class "
                                  "JOIN class_student ON class.class_id=class_student.class_id "
@@ -47,6 +48,7 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
     //选择完班级以后，显示作业
     QStringList list2={"作业名称","作业介绍","截止日期","截止时间"};
     TableWindow *tableWindow2=new TableWindow(list2);
+    tableWindow2->searchEdit->setPlaceholderText("输入课程代号、名称、描述以筛选");//设置edit
     tableWindow2->connectDataBase(QString("SELECT name,description,"
                           "d,t FROM homework_class "
                           "WHERE class_id=%1;").arg(classId));
@@ -69,7 +71,12 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
     labelEdit->setText("基本信息");
     QTextEdit *textEdit=new QTextEdit;
     labelEdit->addDown(textEdit);
+    textEdit->setReadOnly(true);
     textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节");
+    QFont fontTemp;
+    fontTemp.setPointSize(12);
+    textEdit->setFont(fontTemp);
+
     tableWindow2->leftLayout->addWidget(labelEdit);
 
     //search layout
@@ -103,6 +110,11 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     QTextEdit *textEdit=new QTextEdit;
     labelEditIntro->mainLayout->addWidget(textEdit);
     textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br>").arg(classId).arg(homeworkName));
+    textEdit->setReadOnly(true);
+    QFont fontTemp;
+    fontTemp.setPointSize(12);
+    textEdit->setFont(fontTemp);
+
     fileWindow->leftSplitter->addWidget(labelEditIntro);
 
     //测试样例
@@ -371,5 +383,8 @@ void StudentMainwindow::handIn(QString classId, QString homeworkName)
         query.exec(sql);
         }
     }
-    else{}//如果没有提交文件
+    else
+    {
+
+    }//如果没有提交文件
 }
