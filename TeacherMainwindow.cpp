@@ -80,7 +80,7 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
         className=query.value(0).toString();
         description=query.value(1).toString();
     }
-    textEdit->setText(QString("<b>班级</b>：%1<br> <b>描述</b>：%2").arg(className).arg(description));
+    textEdit->setText(QString("<b>课程</b>：%1<br> <b>描述</b>：%2").arg(className).arg(description));
     textEdit->setReadOnly(true);
     QFont fontTemp;
     fontTemp.setPointSize(12);
@@ -205,7 +205,16 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     labelEdit->label->setText("基本信息");
     QTextEdit *textEdit=new QTextEdit;
     labelEdit->mainLayout->addWidget(textEdit);
-    textEdit->setText("<b>班级</b>：09132班<br> <b>上课时间</b>：星期四2~3节<br> <b>作业</b>：Ex01");
+    //获取课程信息
+    QSqlQuery query;
+    query.exec(QString("SELECT * FROM class WHERE class.class_id=%1").arg(classId));
+    while(query.next())
+    {
+        textEdit->setText(QString("<b>课程</b>：%1<br> <b>描述</b>：%2<br> <b>作业</b>：%3")
+                              .arg(query.value(1).toString() )
+                              .arg(query.value(2).toString())
+                              .arg(homeworkName));
+    }
     textEdit->setReadOnly(true);
     QFont fontTemp;
     fontTemp.setPointSize(12);
@@ -247,7 +256,18 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
     QTextEdit *textEdit=new QTextEdit;
     labelEditIntro->mainLayout->addWidget(textEdit);
-    textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
+    //获取课程信息
+    QSqlQuery query;
+    query.exec(QString("SELECT * FROM class WHERE class.class_id=%1").arg(classId));
+    while(query.next())
+    {
+        textEdit->setText(QString("<b>课程</b>：%1<br> <b>描述</b>：%2<br> <b>作业</b>：%3<br><b>学生</b>：%4")
+                              .arg(query.value(1).toString() )
+                              .arg(query.value(2).toString())
+                              .arg(homeworkName)
+                                .arg(studentName));
+    }
+    // textEdit->setText(QString("<b>班级</b>：%1<br> <b>作业</b>：%2 <br><b>学生</b>：%3").arg(classId).arg(homeworkName).arg(studentName));
     textEdit->setReadOnly(true);
     QFont fontTemp;
     fontTemp.setPointSize(12);

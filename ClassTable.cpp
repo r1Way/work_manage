@@ -172,28 +172,31 @@ void ClassTable::showContextMenu(const QPoint &pos)
     QTableWidgetItem *item=tableWidget->itemAt(pos);
     if(item!=nullptr)
     {
-        int row=item->row();
-    QMenu *contextMenu=new QMenu(tr("Context menu"), this);
-    qDebug()<<"ClassTable::showContextMenu: row="<<row;
+            int row=item->row();
+        QMenu *contextMenu=new QMenu(tr("Context menu"), this);
+        qDebug()<<"ClassTable::showContextMenu: row="<<row;
 
-    //action1 删除此行
-    QAction * action1=new QAction("删除此行", this);
-    connect(action1, &QAction::triggered, this, [this,row]()
+        //action1 删除此行
+        QAction * action1=new QAction("删除此行", this);
+        connect(action1, &QAction::triggered, this, [this,row]()
             {
-                QSqlQuery query_remove;
-                QString id=tableWidget->takeItem(row,0)->text();
-                //tableWidget中删除
-                tableWidget->removeRow(row);
-                //sql中删除
-                QString sql=QString("delete from class where class_id=%1;").arg(id.toInt());
-                query_remove.exec(sql);
+            QSqlQuery query_remove;
+            QString id=tableWidget->takeItem(row,0)->text();
+            //tableWidget中删除
+            tableWidget->removeRow(row);
+            //sql中删除
+            QString sql=QString("delete from class where class_id=%1;").arg(id.toInt());
+            query_remove.exec(sql);
             });
-    contextMenu->addAction(action1);
+        contextMenu->addAction(action1);
 
-    //action2 添加学生
-    QAction *action2=new QAction("添加学生",this);
-    connect(action2,&QAction::triggered,this,[this, row]()
-    {
+        QMenu *addMenu=new QMenu("添加");
+        contextMenu->addMenu(addMenu);
+        //action2 添加学生
+        QAction *action2=new QAction("添加学生",this);
+        addMenu->addAction(action2);
+        connect(action2,&QAction::triggered,this,[this, row]()
+        {
         QDialog *dialog=new QDialog;
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         QVBoxLayout *layout=new QVBoxLayout;
@@ -206,6 +209,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
         edit->setPlaceholderText("请输入学生学号");
         QPushButton *ensure=new QPushButton("确认");
         layout->addWidget(ensure);
+
         connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
         {
             QSqlQuery query;
@@ -213,18 +217,80 @@ void ClassTable::showContextMenu(const QPoint &pos)
             dialog->close();
         });
         dialog->show();
-    });
-    contextMenu->addAction(action2);
+        });
 
-    //添加教师
-    QAction *action3=new QAction("添加教师",this);
-    connect(action3,&QAction::triggered,this,[this, row]()
+        //添加教师
+        QAction *action3=new QAction("添加教师",this);
+        addMenu->addAction(action3);
+        connect(action3,&QAction::triggered,this,[this, row]()
             {
+            QDialog *dialog=new QDialog;
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            QVBoxLayout *layout=new QVBoxLayout;
+            dialog->setLayout(layout);
+            dialog->setWindowTitle("添加教师至课程");
+            QLabel *label=new QLabel("工号");
+            layout->addWidget(label);
+            QLineEdit *edit=new QLineEdit;
+            layout->addWidget(edit);
+            edit->setPlaceholderText("请输入教师工号");
+            QPushButton *ensure=new QPushButton("确认");
+            layout->addWidget(ensure);
+            connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
+                {
+                    qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
+                    QSqlQuery query;
+                    query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
+                    dialog->close();
+                });
+            dialog->show();
+            });
+
+        QMenu *partMenu=new QMenu("查看组成");
+        contextMenu->addMenu(partMenu);
+         //班级组成
+        QAction *action4=new QAction("教师组成",this);
+        connect(action4,&QAction::triggered,[this,row]()
+        {
+            QString classId=tableWidget->item(row,0)->text();
+            QStringList list1={"工号","姓名","专业"};
+            TableWindow *tableWindow1=new TableWindow(list1);//显示教师
+            QString sql=QString("SELECT teacher.teacher_id,teacher.name,teacher.major FROM teacher "
+                                  "JOIN class_teacher ON class_teacher.teacher_id=teacher.teacher_id "
+                                  "WHERE class_teacher.class_id=%1").arg(classId);
+            tableWindow1->connectDataBase(sql);
+            tableWindow1->mainSplitter->setSizes(QList<int>() <<0<<10000);
+            tableWindow1->show();
+        });
+        partMenu->addAction(action4);
+
+        QAction *action5=new QAction("学生组成",this);
+        connect(action5,&QAction::triggered,[this,row]()
+        {
+            QString classId=tableWidget->item(row,0)->text();
+            QStringList list1={"学号","姓名","专业"};
+            TableWindow *tableWindow1=new TableWindow(list1);//显示学生
+            QString sql=QString("SELECT student.student_id,student.name,student.major FROM student "
+                                  "JOIN class_student ON class_student.student_id=student.student_id "
+                                  "WHERE class_student.class_id=%1").arg(classId);
+            tableWindow1->connectDataBase(sql);
+            tableWindow1->mainSplitter->setSizes(QList<int>() <<0<<10000);
+            tableWindow1->show();
+        });
+        partMenu->addAction(action5);
+
+        QMenu *removeMenu=new QMenu("删除");
+        contextMenu->addMenu(removeMenu);
+
+        QAction *action6=new QAction("删除教师");
+        removeMenu->addAction(action6);
+        connect(action6,&QAction::triggered,[]()
+               {
                 QDialog *dialog=new QDialog;
                 dialog->setAttribute(Qt::WA_DeleteOnClose);
                 QVBoxLayout *layout=new QVBoxLayout;
                 dialog->setLayout(layout);
-                dialog->setWindowTitle("添加教师至课程");
+                dialog->setWindowTitle("从课程删除教师");
                 QLabel *label=new QLabel("工号");
                 layout->addWidget(label);
                 QLineEdit *edit=new QLineEdit;
@@ -232,17 +298,45 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 edit->setPlaceholderText("请输入教师工号");
                 QPushButton *ensure=new QPushButton("确认");
                 layout->addWidget(ensure);
-                connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
-                        {
-                            qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
-                            QSqlQuery query;
-                            query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
-                            dialog->close();
-                        });
-                dialog->show();
-            });
-    contextMenu->addAction(action3);
 
-    contextMenu->exec(tableWidget->mapToGlobal(pos));//阻塞
+                connect(ensure,&QPushButton::clicked,[edit,dialog]()
+                {
+                    QSqlQuery query;
+                    query.exec(QString("DELETE FROM class_teacher WHERE class_teacher.teacher_id=%1").arg(edit->text().toInt()));
+                    dialog->close();
+                });
+                dialog->show();
+
+        });
+
+        QAction *action7=new QAction("删除学生");
+        removeMenu->addAction(action7);
+        connect(action7,&QAction::triggered,[]()
+                {
+                    QDialog *dialog=new QDialog;
+                    dialog->setAttribute(Qt::WA_DeleteOnClose);
+                    QVBoxLayout *layout=new QVBoxLayout;
+                    dialog->setLayout(layout);
+                    dialog->setWindowTitle("从课程删除学生");
+                    QLabel *label=new QLabel("学号");
+                    layout->addWidget(label);
+                    QLineEdit *edit=new QLineEdit;
+                    layout->addWidget(edit);
+                    edit->setPlaceholderText("请输入学生学号");
+                    QPushButton *ensure=new QPushButton("确认");
+                    layout->addWidget(ensure);
+
+                    connect(ensure,&QPushButton::clicked,[edit,dialog]()
+                            {
+                                QSqlQuery query;
+                                query.exec(QString("DELETE FROM class_student WHERE class_student.student_id=%1").arg(edit->text().toInt()));
+                                dialog->close();
+                            });
+                    dialog->show();
+
+                });
+
+        contextMenu->exec(tableWidget->mapToGlobal(pos));
     }
+
 }

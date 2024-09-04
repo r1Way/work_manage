@@ -33,7 +33,7 @@ StudentTable::StudentTable():MyTableWidget()
                 //font
                 QFont *font=new QFont;
                 font->setPointSize(13);
-                QDialog *dialog=new QDialog();
+                QDialog *dialog=new QDialog(this);
 
                 //title
                 dialog->setWindowTitle("添加学生");
@@ -87,9 +87,9 @@ StudentTable::StudentTable():MyTableWidget()
                     QSqlQuery query(QString("SELECT count(*) FROM pass where user='student' and id=%1").arg(stuNumEdit->text().toInt()));
                     while (query.next())
                     {
+                        // num=query.value(0).toInt();
                         query.exec(QString("INSERT INTO pass value('student',%1,'8888')").arg(stuNumEdit->text().toInt()));
                     }
-
                 });
 
                 dialog->show();
@@ -181,14 +181,36 @@ void StudentTable::showContextMenu(const QPoint &pos)
     connect(action1, &QAction::triggered, this, [this,row]()
     {
         QSqlQuery query_remove;
-        QString id=tableWidget->takeItem(row,0)->text();
+        QString id=tableWidget->item(row,0)->text();
         //tableWidget中删除
         tableWidget->removeRow(row);
+
         //sql中删除
         QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
         query_remove.exec(sql);
     });
     contextMenu.addAction(action1);
+
+
+    QAction *action2=new QAction("查看课程",this);
+    connect(action2,&QAction::triggered,this,[this,row]()
+    {
+        QSqlQuery queryClass;
+        QString id=tableWidget->item(row,0)->text();
+        QString sql=QString("SELECT class.class_id,class.name,class.description FROM class "
+                              "JOIN class_student ON class.class_id=class_student.class_id "
+                              "WHERE class_student.student_id= %1").arg(id);
+
+
+        QStringList list1={"课程代号","课程名称","课程描述"};
+        TableWindow * tableWindow=new TableWindow(list1);
+        tableWindow->setWindowTitle("学生所学课程");
+        tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
+        tableWindow->connectDataBase(sql);
+        tableWindow->resize(600,400);
+        tableWindow->show();
+    });
+    contextMenu.addAction(action2);
 
     contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
     }

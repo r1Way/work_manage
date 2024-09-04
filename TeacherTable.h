@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "MyTableWidget.h"
 #include <QHeaderView>
+#include "TableWindow.h"
 
 class TeacherTable : public MyTableWidget
 {

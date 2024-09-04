@@ -141,11 +141,11 @@ void Login::handleLogin()
         // 可选：自定义样式
         msgBox.setStyleSheet(
             "QMessageBox {"
-            "background-color: #2E2E2E;"  // 设置背景颜色
-            "color: #FFFFFF;"             // 设置文字颜色
+            "background-color: white;"  // 设置背景颜色
+            "color: white;"             // 设置文字颜色
             "}"
             "QPushButton {"
-            "color: #000000;"             // 按钮文字颜色
+            "color: white;"             // 按钮文字颜色
             "background-color: #A9A9A9;"  // 按钮背景颜色
             "}"
             );

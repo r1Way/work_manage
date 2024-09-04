@@ -185,6 +185,26 @@ void TeacherTable::showContextMenu(const QPoint &pos)
             });
     contextMenu.addAction(action1);
 
+    QAction *action2=new QAction("查看课程",this);
+    connect(action2,&QAction::triggered,this,[this,row]()
+    {
+        QSqlQuery queryClass;
+        QString id=tableWidget->item(row,0)->text();
+        QString sql=QString("SELECT class.class_id,class.name,class.description FROM class "
+                              "JOIN class_teacher ON class.class_id=class_teacher.class_id "
+                              "WHERE class_teacher.teacher_id= %1").arg(id);
+
+
+        QStringList list1={"课程代号","课程名称","课程描述"};
+        TableWindow * tableWindow=new TableWindow(list1);
+        tableWindow->setWindowTitle("教师所教课程");
+        tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
+        tableWindow->connectDataBase(sql);
+        tableWindow->resize(600,400);
+        tableWindow->show();
+    });
+    contextMenu.addAction(action2);
+
     contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
     }
 }

@@ -3,7 +3,10 @@
 #include <QWidget>
 #include "MyTableWidget.h"
 #include <QHeaderView>
+#include "TableWindow.h"
+#include <QSplitter>
 #include <Qdir>
+#include <QPushButton>
 extern QString PATH;
 class ClassTable: public MyTableWidget
 {

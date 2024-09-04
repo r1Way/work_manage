@@ -32,7 +32,16 @@ HeadWidget::HeadWidget(QWidget *parent)
         query.exec(sql);
         while(query.next())
         {
-            userName->setText(query.value(0).toString());
+            QString chinese_identity;
+            if(user_identity=="student")
+            {
+                chinese_identity="学生: ";
+            }
+            else if (user_identity=="teacher")
+            {
+                chinese_identity="教师: ";
+            }
+            userName->setText(chinese_identity+query.value(0).toString());
         }
     }
 
