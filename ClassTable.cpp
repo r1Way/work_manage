@@ -28,13 +28,11 @@ ClassTable::ClassTable()
     //addBtn的槽
     connect(add,&QPushButton::clicked,[this]()
             {
-
-
                 //font
                 QFont *font=new QFont;
                 font->setPointSize(13);
                 QDialog *dialog=new QDialog();
-
+                dialog->setWindowIcon(QIcon("://img/icopng"));
                 //title
                 dialog->setWindowTitle("添加课程");
 
@@ -54,6 +52,7 @@ ClassTable::ClassTable()
                 QHBoxLayout *layout2=new QHBoxLayout;
                 QLabel *id=new QLabel("课程编号");
                 QLineEdit *idEdit=new QLineEdit;
+                idEdit->setValidator(new QIntValidator(idEdit));
                 id->setFont(*font);
                 layout2->addWidget(id);
                 layout2->addWidget(idEdit);
@@ -78,16 +77,35 @@ ClassTable::ClassTable()
 
                 connect(ensureAdd,&QPushButton::clicked,[this,idEdit,nameEdit,descEdit,dialog]()
                         {
-                            this->addClass(idEdit->text(),nameEdit->text(),descEdit->text());
-                            QString sql=QString("insert into class(class_id,name,description) value(%1,'%2','%3')").arg(idEdit->text()).arg(nameEdit->text()).arg(descEdit->text());
-                            QSqlQuery queryAdd;
-                            queryAdd.exec(sql);
-                            dialog->close();
-                            //创建文件夹
-                            QDir dir(PATH);
-                            if(!dir.exists(idEdit->text()))
+                            if(nameEdit->text()!=""&&idEdit->text()!="")
                             {
-                                dir.mkdir(idEdit->text());
+                                this->addClass(idEdit->text(),nameEdit->text(),descEdit->text());
+                                QString sql=QString("insert into class(class_id,name,description) value(%1,'%2','%3')").arg(idEdit->text()).arg(nameEdit->text()).arg(descEdit->text());
+                                QSqlQuery queryAdd;
+                                queryAdd.exec(sql);
+                                dialog->close();
+                                //创建文件夹
+                                QDir dir(PATH);
+                                if(!dir.exists(idEdit->text()))
+                                {
+                                    dir.mkdir(idEdit->text());
+                                }
+                            }
+                            else
+                            {
+                                // 创建一个 QMessageBox 对象
+                                QMessageBox messageBox;
+                                messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                // 设置消息框的标题
+                                messageBox.setWindowTitle("填写验证");
+                                // 设置消息框显示的文本
+                                messageBox.setText("信息填写不完整，请继续填写。");
+                                // 设置消息框的图标类型
+                                messageBox.setIcon(QMessageBox::Warning);
+                                // 设置消息框的标准按钮
+                                messageBox.setStandardButtons(QMessageBox::Ok);
+                                // 显示消息框
+                                messageBox.exec();
                             }
                         });
 
@@ -180,42 +198,97 @@ void ClassTable::showContextMenu(const QPoint &pos)
         QAction * action1=new QAction("删除此行", this);
         connect(action1, &QAction::triggered, this, [this,row]()
             {
-            QSqlQuery query_remove;
-            QString id=tableWidget->takeItem(row,0)->text();
-            //tableWidget中删除
-            tableWidget->removeRow(row);
-            //sql中删除
-            QString sql=QString("delete from class where class_id=%1;").arg(id.toInt());
-            query_remove.exec(sql);
+            // 创建一个确认删除的对话框
+            QMessageBox msgBox;
+            msgBox.setWindowIcon(QIcon("://img/icopng"));
+            msgBox.setWindowTitle("删除确认");
+            msgBox.setText("确定删除此课程？");
+
+            QPushButton *confirmButton = msgBox.addButton("确认", QMessageBox::YesRole);
+            QPushButton *cancelButton = msgBox.addButton("取消", QMessageBox::NoRole);
+            msgBox.exec();
+
+                // 判断用户点击了哪个按钮
+                if (msgBox.clickedButton() == confirmButton)
+                {
+                    QSqlQuery query_remove;
+                    QString classId=tableWidget->item(row,0)->text();
+                    //tableWidget中删除
+                    tableWidget->removeRow(row);
+                    //sql中删除
+                    QString sql=QString("delete from class where class_id=%1;").arg(classId.toInt());
+                    query_remove.exec(sql);
+
+                    //删除文件夹
+                    QDir dir(PATH+QString("/%1").arg(classId));
+                    dir.removeRecursively();
+                }
+                else if (msgBox.clickedButton() == cancelButton)
+                {
+
+                }
+
             });
         contextMenu->addAction(action1);
 
         QMenu *addMenu=new QMenu("添加");
         contextMenu->addMenu(addMenu);
+
+
         //action2 添加学生
         QAction *action2=new QAction("添加学生",this);
         addMenu->addAction(action2);
         connect(action2,&QAction::triggered,this,[this, row]()
         {
         QDialog *dialog=new QDialog;
+        dialog->setWindowIcon(QIcon("://img/icopng"));
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         QVBoxLayout *layout=new QVBoxLayout;
         dialog->setLayout(layout);
         dialog->setWindowTitle("添加学生至课程");
         QLabel *label=new QLabel("学号");
+        QFont font;
+        font.setPointSize(12);
+        label->setFont(font);
         layout->addWidget(label);
         QLineEdit *edit=new QLineEdit;
         layout->addWidget(edit);
+        edit->setValidator(new QIntValidator(edit));
         edit->setPlaceholderText("请输入学生学号");
+        edit->setFont(font);
         QPushButton *ensure=new QPushButton("确认");
         layout->addWidget(ensure);
 
-        connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
-        {
-            QSqlQuery query;
-            query.exec(QString("INSERT INTO class_student value(%1,%2)").arg(tableWidget->itemAt(row,0)->text().toInt()).arg(edit->text().toInt()));
-            dialog->close();
-        });
+            connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
+            {
+                if(edit->text()!="")
+                {
+                    QSqlQuery query;
+                    query.exec(QString("INSERT INTO class_student value(%1,%2)").arg(tableWidget->itemAt(row,0)->text().toInt()).arg(edit->text().toInt()));
+                    dialog->close();
+                }
+                else
+                {
+                    // 创建一个 QMessageBox 对象
+                    QMessageBox messageBox;
+
+                    // 设置消息框的标题
+                    messageBox.setWindowTitle("输入验证");
+
+                    // 设置消息框显示的文本
+                    messageBox.setText("输入为空，请重新输入。");
+
+                    // 设置消息框的图标类型
+                    messageBox.setIcon(QMessageBox::Warning);
+
+                    // 设置消息框的标准按钮
+                    messageBox.setStandardButtons(QMessageBox::Ok);
+
+                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                    // 显示消息框
+                    messageBox.exec();
+                }
+            });
         dialog->show();
         });
 
@@ -225,36 +298,69 @@ void ClassTable::showContextMenu(const QPoint &pos)
         connect(action3,&QAction::triggered,this,[this, row]()
             {
             QDialog *dialog=new QDialog;
+            dialog->setWindowIcon(QIcon("://img/icopng"));
             dialog->setAttribute(Qt::WA_DeleteOnClose);
             QVBoxLayout *layout=new QVBoxLayout;
             dialog->setLayout(layout);
             dialog->setWindowTitle("添加教师至课程");
             QLabel *label=new QLabel("工号");
+            QFont font;
+            font.setPointSize(12);
+            label->setFont(font);
             layout->addWidget(label);
             QLineEdit *edit=new QLineEdit;
+            edit->setFont(font);
             layout->addWidget(edit);
             edit->setPlaceholderText("请输入教师工号");
+            edit->setValidator(new QIntValidator(edit));
             QPushButton *ensure=new QPushButton("确认");
             layout->addWidget(ensure);
             connect(ensure,&QPushButton::clicked,[this,edit,row,dialog]()
                 {
-                    qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
-                    QSqlQuery query;
-                    query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
-                    dialog->close();
+                    if(edit->text()!="")
+                    {
+                        qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
+                        QSqlQuery query;
+                        query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
+                        dialog->close();
+
+                    }
+                    else
+                    {
+                        // 创建一个 QMessageBox 对象
+                        QMessageBox messageBox;
+
+                        // 设置消息框的标题
+                        messageBox.setWindowTitle("输入验证");
+
+                        // 设置消息框显示的文本
+                        messageBox.setText("输入为空，请重新输入。");
+
+                        // 设置消息框的图标类型
+                        messageBox.setIcon(QMessageBox::Warning);
+
+                        // 设置消息框的标准按钮
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        // 显示消息框
+                        messageBox.exec();
+                    }
                 });
-            dialog->show();
+             dialog->show();
             });
 
         QMenu *partMenu=new QMenu("查看组成");
         contextMenu->addMenu(partMenu);
-         //班级组成
+
+        //教师组成
         QAction *action4=new QAction("教师组成",this);
         connect(action4,&QAction::triggered,[this,row]()
         {
             QString classId=tableWidget->item(row,0)->text();
             QStringList list1={"工号","姓名","专业"};
             TableWindow *tableWindow1=new TableWindow(list1);//显示教师
+            tableWindow1->setWindowIcon(QIcon("://img/icopng"));
             QString sql=QString("SELECT teacher.teacher_id,teacher.name,teacher.major FROM teacher "
                                   "JOIN class_teacher ON class_teacher.teacher_id=teacher.teacher_id "
                                   "WHERE class_teacher.class_id=%1").arg(classId);
@@ -264,12 +370,14 @@ void ClassTable::showContextMenu(const QPoint &pos)
         });
         partMenu->addAction(action4);
 
+        //学生组成
         QAction *action5=new QAction("学生组成",this);
         connect(action5,&QAction::triggered,[this,row]()
         {
             QString classId=tableWidget->item(row,0)->text();
             QStringList list1={"学号","姓名","专业"};
             TableWindow *tableWindow1=new TableWindow(list1);//显示学生
+            tableWindow1->setWindowIcon(QIcon("://img/icopng"));
             QString sql=QString("SELECT student.student_id,student.name,student.major FROM student "
                                   "JOIN class_student ON class_student.student_id=student.student_id "
                                   "WHERE class_student.class_id=%1").arg(classId);
@@ -287,6 +395,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
         connect(action6,&QAction::triggered,[]()
                {
                 QDialog *dialog=new QDialog;
+                dialog->setWindowIcon(QIcon("://img/icopng"));
                 dialog->setAttribute(Qt::WA_DeleteOnClose);
                 QVBoxLayout *layout=new QVBoxLayout;
                 dialog->setLayout(layout);
@@ -314,6 +423,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
         connect(action7,&QAction::triggered,[]()
                 {
                     QDialog *dialog=new QDialog;
+                    dialog->setWindowIcon(QIcon("://img/icopng"));
                     dialog->setAttribute(Qt::WA_DeleteOnClose);
                     QVBoxLayout *layout=new QVBoxLayout;
                     dialog->setLayout(layout);

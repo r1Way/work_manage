@@ -278,7 +278,11 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     QWidget *scoreWidget=new QWidget;
     QHBoxLayout *scoreLayout=new QHBoxLayout(scoreWidget);
     QLabel *score=new QLabel("分数");
+    QFont tempFont;
+    tempFont.setPointSize(12);
+    score->setFont(font);
     QLineEdit *scoreEdit=new QLineEdit;
+    scoreEdit->setValidator(new QIntValidator(scoreEdit));
     QPushButton *ensureScore=new QPushButton("确定");
     QFont temp=ensureScore->font();
     temp.setPointSize(11);
@@ -290,14 +294,17 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
     // fileWindow->leftLayout->insertLayout(2,scoreLayout);
     connect(ensureScore,&QPushButton::clicked,[studentId,classId,homeworkName,scoreEdit]()
     {
-        int score=scoreEdit->text().toInt();
-        QSqlQuery query;
-        QString sql=QString("UPDATE homework_student "
-                              "SET score=%1 "
-                              "WHERE student_id=%2 and "
-                              "class_id=%3 and "
-                              "name='%4';").arg(score).arg(studentId).arg(classId).arg(homeworkName);
-        query.exec(sql);
+        if(scoreEdit->text()!="")
+        {
+            int score=scoreEdit->text().toInt();
+            QSqlQuery query;
+            QString sql=QString("UPDATE homework_student "
+                                  "SET score=%1 "
+                                  "WHERE student_id=%2 and "
+                                  "class_id=%3 and "
+                                  "name='%4';").arg(score).arg(studentId).arg(classId).arg(homeworkName);
+            query.exec(sql);
+        }
     });
 
 
@@ -424,7 +431,10 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
 void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2)
 {
+    QFont font;
+    font.setPointSize(12);
     QDialog *dialog=new QDialog;
+    dialog->setWindowIcon(QIcon("://img/icopng"));
     QVBoxLayout *mainLayout=new QVBoxLayout;
     dialog->setLayout(mainLayout);
 
@@ -437,47 +447,79 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
     }
 
     QLabel *name=new QLabel("作业名");
+    name->setFont(font);
     QLineEdit * nameEdit=new QLineEdit;
+    nameEdit->setFont(font);
     layouts[0]->addWidget(name);
     layouts[0]->addWidget(nameEdit);
 
     QLabel *description=new QLabel("描述");
+    description->setFont(font);
     QLineEdit *descriptionEdit=new QLineEdit;
+    descriptionEdit->setFont(font);
     layouts[1]->addWidget(description);
     layouts[1]->addWidget(descriptionEdit);
 
     QLabel *date=new QLabel("截止日期");
+    date->setFont(font);
     QDateEdit *dateEdit=new QDateEdit;
+    dateEdit->setDate(QDate::currentDate());
+    dateEdit->setFixedSize(150,30);
+    dateEdit->setFont(font);
     layouts[2]->addWidget(date);
     layouts[2]->addWidget(dateEdit);
 
     QLabel *time =new QLabel("截止时间");
+    time->setFont(font);
     QTimeEdit *timeEdit=new QTimeEdit;
+    timeEdit->setTime(QTime::currentTime());
+    timeEdit->setFont(font);
     layouts[3]->addWidget(time);
     layouts[3]->addWidget(timeEdit);
 
     QPushButton *ensure=new QPushButton("确认");
+    ensure->setFont(font);
     mainLayout->addWidget(ensure);
     connect(ensure,&QPushButton::clicked,[this,nameEdit,descriptionEdit,dateEdit,timeEdit,classId,dialog,tableWindow2]()
     {
         //qDebug()<<classId<<dateEdit->date().toString("yyyy-MM-dd")<<"   "<<timeEdit->time().toString("HH:mm:ss");
-        //添加到表
-        addHomework(classId,nameEdit->text(),descriptionEdit->text(),dateEdit->date().toString("yyyy-MM-dd"),timeEdit->time().toString("HH:mm:ss"),tableWindow2);
-        //添加到数据库
-        QSqlQuery query;
-        QString sql=QString("INSERT INTO homework_class value(%1,'%2','%3','%4','%5')")
-                          .arg(classId)
-                          .arg(nameEdit->text())
-                          .arg(descriptionEdit->text())
-                          .arg(dateEdit->date().toString("yyyy-MM-dd"))
-                          .arg(timeEdit->time().toString("HH:mm:ss"));
-        query.exec(sql);
-        dialog->close();
-        //创建文件夹
-        QDir dir(PATH+"/"+classId);
-        if(!dir.exists(nameEdit->text()))
+        if(nameEdit->text()!="")//作业名是否为空
         {
-            dir.mkdir(nameEdit->text());
+
+                //添加到表
+                addHomework(classId,nameEdit->text(),descriptionEdit->text(),dateEdit->date().toString("yyyy-MM-dd"),timeEdit->time().toString("HH:mm:ss"),tableWindow2);
+                //添加到数据库
+                QSqlQuery querySameName;
+                querySameName.exec(QString("SELECT COUNT(*) FROM homework_class "
+                                   "WHERE class_id=%1 and "
+                                           "name='%2'").arg(classId).arg(nameEdit->text()));
+                int nums=-1;
+                while(querySameName.next())
+                {
+                    nums=querySameName.value(0).toInt();
+                }
+                if(nums!=0)//作业名重复
+                {
+
+                }
+                else
+                {
+                    QSqlQuery query;
+                    QString sql=QString("INSERT INTO homework_class value(%1,'%2','%3','%4','%5')")
+                                      .arg(classId)
+                                      .arg(nameEdit->text())
+                                      .arg(descriptionEdit->text())
+                                      .arg(dateEdit->date().toString("yyyy-MM-dd"))
+                                      .arg(timeEdit->time().toString("HH:mm:ss"));
+                    query.exec(sql);
+                    dialog->close();
+                    //创建文件夹
+                    QDir dir(PATH+"/"+classId);
+                    if(!dir.exists(nameEdit->text()))
+                    {
+                        dir.mkdir(nameEdit->text());
+                    }
+                }
         }
     });
     dialog->show();
@@ -495,16 +537,22 @@ void TeacherMainWindow::addHomework(QString classId, QString name, QString descr
 
 void TeacherMainWindow::addExample(QString classId, QString homeworkName)
 {
+    QFont font;
+    font.setPointSize(12);
+
     QDialog *dialog=new QDialog;
+    dialog->setWindowIcon(QIcon("://img/icopng"));
     QVBoxLayout *mainLayout=new QVBoxLayout;
     dialog->setLayout(mainLayout);
     QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
 
     QLabel *label=new QLabel("请输入测试样例");
+    label->setFont(font);
     mainLayout->addWidget(label);
 
     //写入
     QPlainTextEdit *exampleEdit=new QPlainTextEdit;
+    exampleEdit->setFont(font);
     mainLayout->addWidget(exampleEdit);
     if (!QFile::exists(fileName))
     {

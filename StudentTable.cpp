@@ -34,7 +34,7 @@ StudentTable::StudentTable():MyTableWidget()
                 QFont *font=new QFont;
                 font->setPointSize(13);
                 QDialog *dialog=new QDialog(this);
-
+                dialog->setWindowIcon(QIcon("://img/icopng"));
                 //title
                 dialog->setWindowTitle("添加学生");
 
@@ -54,6 +54,7 @@ StudentTable::StudentTable():MyTableWidget()
                 QHBoxLayout *layout2=new QHBoxLayout;
                 QLabel *stuNum=new QLabel("学号");
                 QLineEdit *stuNumEdit=new QLineEdit;
+                stuNumEdit->setValidator(new QIntValidator(stuNumEdit));
                 stuNum->setFont(*font);
                 layout2->addWidget(stuNum);
                 layout2->addWidget(stuNumEdit);
@@ -87,7 +88,7 @@ StudentTable::StudentTable():MyTableWidget()
                     QSqlQuery query(QString("SELECT count(*) FROM pass where user='student' and id=%1").arg(stuNumEdit->text().toInt()));
                     while (query.next())
                     {
-                        // num=query.value(0).toInt();
+
                         query.exec(QString("INSERT INTO pass value('student',%1,'8888')").arg(stuNumEdit->text().toInt()));
                     }
                 });
@@ -180,14 +181,28 @@ void StudentTable::showContextMenu(const QPoint &pos)
     QAction * action1=new QAction("删除此行", this);
     connect(action1, &QAction::triggered, this, [this,row]()
     {
-        QSqlQuery query_remove;
-        QString id=tableWidget->item(row,0)->text();
-        //tableWidget中删除
-        tableWidget->removeRow(row);
+        // 创建一个确认删除的对话框
+        QMessageBox msgBox;
+        msgBox.setWindowIcon(QIcon("://img/icopng"));
+        msgBox.setWindowTitle("删除确认");
+        msgBox.setText("确定删除此课程？");
 
-        //sql中删除
-        QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
-        query_remove.exec(sql);
+        QPushButton *confirmButton = msgBox.addButton("确认", QMessageBox::YesRole);
+        QPushButton *cancelButton = msgBox.addButton("取消", QMessageBox::NoRole);
+        msgBox.exec();
+
+        // 判断用户点击了哪个按钮
+        if (msgBox.clickedButton() == confirmButton)
+        {
+            QSqlQuery query_remove;
+            QString id=tableWidget->item(row,0)->text();
+            //tableWidget中删除
+            tableWidget->removeRow(row);
+            //sql中删除
+            QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
+            query_remove.exec(sql);
+        }
+
     });
     contextMenu.addAction(action1);
 
@@ -204,6 +219,7 @@ void StudentTable::showContextMenu(const QPoint &pos)
 
         QStringList list1={"课程代号","课程名称","课程描述"};
         TableWindow * tableWindow=new TableWindow(list1);
+        tableWindow->setWindowIcon(QIcon("://img/icopng"));
         tableWindow->setWindowTitle("学生所学课程");
         tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
         tableWindow->connectDataBase(sql);

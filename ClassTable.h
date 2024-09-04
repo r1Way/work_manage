@@ -7,6 +7,7 @@
 #include <QSplitter>
 #include <Qdir>
 #include <QPushButton>
+#include <QMessageBox>
 extern QString PATH;
 class ClassTable: public MyTableWidget
 {

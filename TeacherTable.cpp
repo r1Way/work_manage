@@ -33,7 +33,7 @@ TeacherTable::TeacherTable()
                 QFont *font=new QFont;
                 font->setPointSize(13);
                 QDialog *dialog=new QDialog();
-
+                dialog->setWindowIcon(QIcon("://img/icopng"));
                 //title
                 dialog->setWindowTitle("添加教师");
 
@@ -197,6 +197,7 @@ void TeacherTable::showContextMenu(const QPoint &pos)
 
         QStringList list1={"课程代号","课程名称","课程描述"};
         TableWindow * tableWindow=new TableWindow(list1);
+        tableWindow->setWindowIcon(QIcon("://img/icopng"));
         tableWindow->setWindowTitle("教师所教课程");
         tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
         tableWindow->connectDataBase(sql);

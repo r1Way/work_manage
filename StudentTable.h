@@ -6,7 +6,7 @@
 #include <QHeaderView>
 #include <QVector>
 #include "TableWindow.h"
-
+#include <QMessageBox>
 class StudentTable:public MyTableWidget
 {
 public:

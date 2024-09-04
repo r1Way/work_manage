@@ -115,6 +115,7 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
 
     QTextEdit *textEdit=new QTextEdit;
     labelEditIntro->mainLayout->addWidget(textEdit);
+
     //获取课程信息
     QSqlQuery query;
     query.exec(QString("SELECT * FROM class WHERE class.class_id=%1").arg(classId));
