@@ -21,6 +21,7 @@
 #include <QDir>
 #include <QPlainTextEdit>
 #include <QProcess>
+#include <QMessageBox>
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"

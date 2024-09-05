@@ -79,16 +79,36 @@ ClassTable::ClassTable()
                         {
                             if(nameEdit->text()!=""&&idEdit->text()!="")
                             {
-                                this->addClass(idEdit->text(),nameEdit->text(),descEdit->text());
-                                QString sql=QString("insert into class(class_id,name,description) value(%1,'%2','%3')").arg(idEdit->text()).arg(nameEdit->text()).arg(descEdit->text());
                                 QSqlQuery queryAdd;
-                                queryAdd.exec(sql);
-                                dialog->close();
-                                //创建文件夹
-                                QDir dir(PATH);
-                                if(!dir.exists(idEdit->text()))
+                                queryAdd.exec(QString("SELECT COUNT(*) FROM class "
+                                                      "WHERE class_id=%1").arg(idEdit->text()));
+                                int nums=-1;
+                                while(queryAdd.next())
                                 {
-                                    dir.mkdir(idEdit->text());
+                                    nums=queryAdd.value(0).toInt();
+                                }
+                                if(nums==0)
+                                {
+                                    QString sql=QString("insert into class(class_id,name,description) value(%1,'%2','%3')").arg(idEdit->text()).arg(nameEdit->text()).arg(descEdit->text());
+                                    this->addClass(idEdit->text(),nameEdit->text(),descEdit->text());
+                                    queryAdd.exec(sql);
+                                    dialog->close();
+                                    //创建文件夹
+                                    QDir dir(PATH);
+                                    if(!dir.exists(idEdit->text()))
+                                    {
+                                        dir.mkdir(idEdit->text());
+                                    }
+                                }
+                                else
+                                {
+                                    QMessageBox messageBox;
+                                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                    messageBox.setWindowTitle("输入验证");
+                                    messageBox.setText("该课程代号已存在,请重新输入。");
+                                    messageBox.setIcon(QMessageBox::Warning);
+                                    messageBox.setStandardButtons(QMessageBox::Ok);
+                                    messageBox.exec();
                                 }
                             }
                             else
@@ -96,15 +116,10 @@ ClassTable::ClassTable()
                                 // 创建一个 QMessageBox 对象
                                 QMessageBox messageBox;
                                 messageBox.setWindowIcon(QIcon("://img/icopng"));
-                                // 设置消息框的标题
                                 messageBox.setWindowTitle("填写验证");
-                                // 设置消息框显示的文本
                                 messageBox.setText("信息填写不完整，请继续填写。");
-                                // 设置消息框的图标类型
                                 messageBox.setIcon(QMessageBox::Warning);
-                                // 设置消息框的标准按钮
                                 messageBox.setStandardButtons(QMessageBox::Ok);
-                                // 显示消息框
                                 messageBox.exec();
                             }
                         });
@@ -264,8 +279,35 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 if(edit->text()!="")
                 {
                     QSqlQuery query;
-                    query.exec(QString("INSERT INTO class_student value(%1,%2)").arg(tableWidget->itemAt(row,0)->text().toInt()).arg(edit->text().toInt()));
-                    dialog->close();
+                    query.exec(QString("SELECT count(*) FROM student "
+                                       "WHERE student.student_id=%1").arg(edit->text()));
+                    int nums=-1;
+                    while(query.next())
+                    {
+                        nums=query.value(0).toInt();
+                    }
+                    if(nums!=0)
+                    {
+                        query.exec(QString("INSERT INTO class_student value(%1,%2)").arg(tableWidget->itemAt(row,0)->text().toInt()).arg(edit->text().toInt()));
+                        dialog->close();
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("输入验证");
+                        messageBox.setText("添加学生成功。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                    }
+                    else
+                    {
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("输入验证");
+                        messageBox.setText("不存在此学号，请重新输入。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                    }
                 }
                 else
                 {
@@ -319,11 +361,37 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 {
                     if(edit->text()!="")
                     {
-                        qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
+                        // qDebug()<<"ClassTable::showContextMenu: connect"<<tableWidget->item(row,0)->text();
                         QSqlQuery query;
-                        query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
-                        dialog->close();
-
+                        query.exec(QString("SELECT count(*) FROM teacher "
+                                           "WHERE teacher.teacher_id=%1").arg(edit->text()));
+                        int nums=-1;
+                        while(query.next())
+                        {
+                            nums=query.value(0).toInt();
+                        }
+                        if(nums!=0)
+                        {
+                            query.exec(QString("INSERT INTO class_teacher value(%1,%2)").arg(tableWidget->item(row,0)->text().toInt()).arg(edit->text().toInt()));
+                            dialog->close();
+                            QMessageBox messageBox;
+                            messageBox.setWindowIcon(QIcon("://img/icopng"));
+                            messageBox.setWindowTitle("输入验证");
+                            messageBox.setText("添加教师成功。");
+                            messageBox.setIcon(QMessageBox::Warning);
+                            messageBox.setStandardButtons(QMessageBox::Ok);
+                            messageBox.exec();
+                        }
+                        else
+                        {
+                            QMessageBox messageBox;
+                            messageBox.setWindowIcon(QIcon("://img/icopng"));
+                            messageBox.setWindowTitle("输入验证");
+                            messageBox.setText("不存在此工号，请重新输入。");
+                            messageBox.setIcon(QMessageBox::Warning);
+                            messageBox.setStandardButtons(QMessageBox::Ok);
+                            messageBox.exec();
+                        }
                     }
                     else
                     {
@@ -403,6 +471,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 QLabel *label=new QLabel("工号");
                 layout->addWidget(label);
                 QLineEdit *edit=new QLineEdit;
+                edit->setValidator(new QIntValidator(edit));
                 layout->addWidget(edit);
                 edit->setPlaceholderText("请输入教师工号");
                 QPushButton *ensure=new QPushButton("确认");
@@ -411,8 +480,37 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 connect(ensure,&QPushButton::clicked,[edit,dialog]()
                 {
                     QSqlQuery query;
-                    query.exec(QString("DELETE FROM class_teacher WHERE class_teacher.teacher_id=%1").arg(edit->text().toInt()));
-                    dialog->close();
+                    query.exec(QString("SELECT COUNT(*) FROM class_teacher "
+                                        "WHERE class_teacher.teacher_id=%1").arg(edit->text().toInt()));
+                    int nums=-1;
+                    while(query.next())
+                    {
+                        nums=query.value(0).toInt();
+                    }
+                    if(nums!=0)
+                    {
+
+                        query.exec(QString("DELETE FROM class_teacher WHERE class_teacher.teacher_id=%1").arg(edit->text().toInt()));
+
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("删除验证");
+                        messageBox.setText("删除成功");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                        dialog->close();
+                    }
+                    else if(nums==0)
+                    {
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("删除验证");
+                        messageBox.setText("不存在该教师，删除失败,请重新输入。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                    }
                 });
                 dialog->show();
 
@@ -431,6 +529,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                     QLabel *label=new QLabel("学号");
                     layout->addWidget(label);
                     QLineEdit *edit=new QLineEdit;
+                    edit->setValidator(new QIntValidator(edit));
                     layout->addWidget(edit);
                     edit->setPlaceholderText("请输入学生学号");
                     QPushButton *ensure=new QPushButton("确认");
@@ -439,8 +538,36 @@ void ClassTable::showContextMenu(const QPoint &pos)
                     connect(ensure,&QPushButton::clicked,[edit,dialog]()
                             {
                                 QSqlQuery query;
-                                query.exec(QString("DELETE FROM class_student WHERE class_student.student_id=%1").arg(edit->text().toInt()));
-                                dialog->close();
+                                query.exec(QString("SELECT COUNT(*) FROM class_student "
+                                           "WHERE class_student.student_id=%1").arg(edit->text().toInt()));
+                                int nums=-1;
+                                while(query.next())
+                                {
+                                    nums=query.value(0).toInt();
+                                }
+                                if(nums!=0)
+                                {
+                                    query.exec(QString("DELETE FROM class_student WHERE class_student.student_id=%1").arg(edit->text().toInt()));
+
+                                    QMessageBox messageBox;
+                                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                    messageBox.setWindowTitle("删除验证");
+                                    messageBox.setText("删除成功");
+                                    messageBox.setIcon(QMessageBox::Warning);
+                                    messageBox.setStandardButtons(QMessageBox::Ok);
+                                    messageBox.exec();
+                                    dialog->close();
+                                }
+                                else if(nums==0)
+                                {
+                                    QMessageBox messageBox;
+                                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                    messageBox.setWindowTitle("删除验证");
+                                    messageBox.setText("不存在该学生，删除失败,请重新输入。");
+                                    messageBox.setIcon(QMessageBox::Warning);
+                                    messageBox.setStandardButtons(QMessageBox::Ok);
+                                    messageBox.exec();
+                                }
                             });
                     dialog->show();
 

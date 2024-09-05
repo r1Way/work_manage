@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     {
         qDebug("打开数据库连接失败" );
     }
+
     Login login;
     login.show();
     // LabelEdit edit;

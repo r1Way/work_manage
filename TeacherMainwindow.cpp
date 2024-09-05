@@ -500,7 +500,13 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
                 }
                 if(nums!=0)//作业名重复
                 {
-
+                    QMessageBox messageBox;
+                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                    messageBox.setWindowTitle("输入验证");
+                    messageBox.setText("作业名重复，请重新输入。");
+                    messageBox.setIcon(QMessageBox::Warning);
+                    messageBox.setStandardButtons(QMessageBox::Ok);
+                    messageBox.exec();
                 }
                 else
                 {

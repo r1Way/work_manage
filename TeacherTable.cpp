@@ -77,13 +77,50 @@ TeacherTable::TeacherTable()
 
                 connect(ensureAdd,&QPushButton::clicked,[this,nameEdit,idEdit,majorEdit,dialog]()
                         {
-                            //表中添加
-                            this->addTeacher(idEdit->text(),nameEdit->text(),majorEdit->text());
-                            //数据库添加
-                            QString sql=QString("insert into teacher value(%1,'%2','%3')").arg(idEdit->text().toInt()).arg(nameEdit->text()).arg(majorEdit->text());
+                    if(nameEdit->text()!=""&&idEdit->text()!=""&&majorEdit->text()!="")
+                        {
+
                             QSqlQuery queryAdd;
-                            queryAdd.exec(sql);
-                            dialog->close();
+                            queryAdd.exec(QString("SELECT COUNT(*) FROM teacher WHERE teacher_id=%1").arg(idEdit->text()));
+                            int rows=-1;
+                            while(queryAdd.next())
+                            {
+                                rows=queryAdd.value(0).toInt();
+                            }
+
+                            if(rows==0)
+                            {
+                                //表中添加
+                                this->addTeacher(idEdit->text(),nameEdit->text(),majorEdit->text());
+
+                                //数据库添加
+                                QString sql=QString("insert into teacher value(%1,'%2','%3')").arg(idEdit->text().toInt()).arg(nameEdit->text()).arg(majorEdit->text());
+                                queryAdd.exec(sql);
+                                sql=QString("insert into pass value('teacher',%2,'8888')").arg(idEdit->text().toInt()).arg(nameEdit->text()).arg(majorEdit->text());
+                                queryAdd.exec(sql);
+                                dialog->close();
+                            }
+                            else
+                            {
+                                QMessageBox messageBox;
+                                messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                messageBox.setWindowTitle("添加教师验证");
+                                messageBox.setText("该教师已存在。");
+                                messageBox.setIcon(QMessageBox::Warning);
+                                messageBox.setStandardButtons(QMessageBox::Ok);
+                                messageBox.exec();
+                            }
+                        }
+                    else
+                    {
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("输入验证");
+                        messageBox.setText("输入信息不完整，请继续输入。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                    }
                         });
 
                 dialog->show();
@@ -132,6 +169,8 @@ TeacherTable::TeacherTable()
                                         //sql中删除
                                         QString sql=QString("delete from teacher where teacher_id=%1;").arg(id.toInt());
                                         query_remove.exec(sql);
+                                        sql=QString("delete from pass where id=%1;").arg(id.toInt());
+                                        query_remove.exec(sql);
                                         emit batch->clicked();
                                     }
                                 }
@@ -175,13 +214,29 @@ void TeacherTable::showContextMenu(const QPoint &pos)
     QAction * action1=new QAction("删除此行", this);
     connect(action1, &QAction::triggered, this, [this,row]()
             {
-                QSqlQuery query_remove;
-                QString id=tableWidget->takeItem(row,0)->text();
-                //tableWidget中删除
-                tableWidget->removeRow(row);
-                //sql中删除
-                QString sql=QString("delete from teacher where teacher_id=%1;").arg(id.toInt());
-                query_remove.exec(sql);
+                // 创建一个确认删除的对话框
+                QMessageBox msgBox;
+                msgBox.setWindowIcon(QIcon("://img/icopng"));
+                msgBox.setWindowTitle("删除确认");
+                msgBox.setText("确定删除此课程？");
+
+                QPushButton *confirmButton = msgBox.addButton("确认", QMessageBox::YesRole);
+                QPushButton *cancelButton = msgBox.addButton("取消", QMessageBox::NoRole);
+                msgBox.exec();
+
+                // 判断用户点击了哪个按钮
+                if (msgBox.clickedButton() == confirmButton)
+                {
+                    QSqlQuery query_remove;
+                    QString id=tableWidget->takeItem(row,0)->text();
+                    //tableWidget中删除
+                    tableWidget->removeRow(row);
+                    //sql中删除
+                    QString sql=QString("delete from teacher where teacher_id=%1;").arg(id.toInt());
+                    query_remove.exec(sql);
+                    sql=QString("delete from pass where id=%1;").arg(id.toInt());
+                    query_remove.exec(sql);
+                }
             });
     contextMenu.addAction(action1);
 

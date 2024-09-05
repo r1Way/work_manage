@@ -79,17 +79,45 @@ StudentTable::StudentTable():MyTableWidget()
 
                 connect(ensureAdd,&QPushButton::clicked,[this,nameEdit,stuNumEdit,majorEdit,dialog]()
                 {
-                    this->addStudent(stuNumEdit->text(),nameEdit->text(),majorEdit->text());
-                    QString sql=QString("insert into student(student_id,name,major) value('%1','%2','%3')").arg(stuNumEdit->text()).arg(nameEdit->text()).arg(majorEdit->text());
-                    QSqlQuery queryAdd;
-                    queryAdd.exec(sql);
-                    dialog->close();
-
-                    QSqlQuery query(QString("SELECT count(*) FROM pass where user='student' and id=%1").arg(stuNumEdit->text().toInt()));
-                    while (query.next())
+                    if(nameEdit->text()!=""&&majorEdit->text()!=""&&stuNumEdit->text()!="")
                     {
-
-                        query.exec(QString("INSERT INTO pass value('student',%1,'8888')").arg(stuNumEdit->text().toInt()));
+                        QSqlQuery queryAdd;
+                        queryAdd.exec(QString("SELECT COUNT(*) FROM student "
+                                              "WHERE student.student_id=%1").arg(stuNumEdit->text()));
+                        int nums=-1;
+                        while(queryAdd.next())
+                        {
+                            nums=queryAdd.value(0).toInt();
+                        }
+                        if(nums!=0)//有重复
+                        {
+                            QMessageBox messageBox;
+                            messageBox.setWindowIcon(QIcon("://img/icopng"));
+                            messageBox.setWindowTitle("输入验证");
+                            messageBox.setText("已存在该学号，请检查输入。");
+                            messageBox.setIcon(QMessageBox::Warning);
+                            messageBox.setStandardButtons(QMessageBox::Ok);
+                            messageBox.exec();
+                        }
+                        else//无重复
+                        {
+                            this->addStudent(stuNumEdit->text(),nameEdit->text(),majorEdit->text());
+                            QString sql=QString("insert into student(student_id,name,major) value('%1','%2','%3')").arg(stuNumEdit->text()).arg(nameEdit->text()).arg(majorEdit->text());
+                            queryAdd.exec(sql);
+                            dialog->close();
+                            QSqlQuery query;
+                            query.exec(QString("INSERT INTO pass value('student',%1,'8888')").arg(stuNumEdit->text().toInt()));
+                        }
+                    }
+                    else
+                    {
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("输入验证");
+                        messageBox.setText("输入不完整,请重新输入。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
                     }
                 });
 
@@ -138,6 +166,8 @@ StudentTable::StudentTable():MyTableWidget()
                         //sql中删除
                         QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
                         query_remove.exec(sql);
+                        sql=QString("delete from pass where id=%1;").arg(id.toInt());
+                        query_remove.exec(sql);
                         emit batch->clicked();
                     }
                 }
@@ -185,7 +215,7 @@ void StudentTable::showContextMenu(const QPoint &pos)
         QMessageBox msgBox;
         msgBox.setWindowIcon(QIcon("://img/icopng"));
         msgBox.setWindowTitle("删除确认");
-        msgBox.setText("确定删除此课程？");
+        msgBox.setText("确定删除此学生？");
 
         QPushButton *confirmButton = msgBox.addButton("确认", QMessageBox::YesRole);
         QPushButton *cancelButton = msgBox.addButton("取消", QMessageBox::NoRole);
@@ -200,6 +230,8 @@ void StudentTable::showContextMenu(const QPoint &pos)
             tableWidget->removeRow(row);
             //sql中删除
             QString sql=QString("delete from student where student_id=%1;").arg(id.toInt());
+            query_remove.exec(sql);
+            sql=QString("delete from pass where id=%1;").arg(id.toInt());
             query_remove.exec(sql);
         }
 
