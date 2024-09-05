@@ -21,6 +21,9 @@ Login::Login()
     titleLabel->setAlignment(Qt::AlignCenter);
     mainLayOut->addWidget(titleLabel);
 
+    //设置
+
+
     // 创建三个按钮
     btnVec.push_back(new QPushButton("教师"));
     btnVec[0]->setStyleSheet("QPushButton {"

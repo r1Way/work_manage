@@ -261,6 +261,62 @@ void TeacherTable::showContextMenu(const QPoint &pos)
     });
     contextMenu.addAction(action2);
 
+
+    QAction *action3=new QAction("修改此行",this);
+    connect(action3,&QAction::triggered,this,[this,row]()
+            {
+                QDialog *dialog=new QDialog;
+                QVBoxLayout *mainLayout=new QVBoxLayout;
+                dialog->setLayout(mainLayout);
+                QString idRow=this->tableWidget->item(row,0)->text();
+                QString nameRow=this->tableWidget->item(row,1)->text();
+                QString majorRow=this->tableWidget->item(row,2)->text();
+
+                QFont font;
+                font.setPointSize(12);
+                //姓名
+                QHBoxLayout *layout1=new QHBoxLayout;
+                QLabel * name=new QLabel("姓名");
+                QLineEdit *nameEdit=new QLineEdit;
+                nameEdit->setText(nameRow);
+                name->setFont(font);
+                layout1->addWidget(name);
+                layout1->addWidget(nameEdit);
+
+                //专业
+                QHBoxLayout *layout3=new QHBoxLayout;
+                QLabel *major=new QLabel("专业");
+                QLineEdit *majorEdit=new QLineEdit;
+                majorEdit->setText(majorRow);
+                major->setFont(font);
+                layout3->addWidget(major);
+                layout3->addWidget(majorEdit);
+
+                mainLayout->addLayout(layout1);
+                mainLayout->addLayout(layout3);
+
+                QPushButton *ensure=new QPushButton("保存");
+                mainLayout->addWidget(ensure);
+                connect(ensure,&QPushButton::clicked,this,[this,dialog,idRow,nameEdit,majorEdit,row](){
+                    QSqlQuery query;
+                    query.exec(QString("UPDATE teacher "
+                                       "SET name='%1',major='%2' "
+                                       "WHERE teacher_id=%3").arg(nameEdit->text()).arg(majorEdit->text()).arg(idRow));
+                    QMessageBox messageBox;
+                    messageBox.setWindowIcon(QIcon("://img/icopng"));
+                    messageBox.setWindowTitle("编辑验证");
+                    messageBox.setText("保存成功。");
+                    messageBox.setIcon(QMessageBox::Warning);
+                    messageBox.setStandardButtons(QMessageBox::Ok);
+                    messageBox.exec();
+                    this->tableWidget->item(row,1)->setText(nameEdit->text());
+                    this->tableWidget->item(row,2)->setText(majorEdit->text());
+                    dialog->close();
+                });
+                dialog->show();
+            });
+    contextMenu.addAction(action3);
+
     contextMenu.exec(tableWidget->mapToGlobal(pos));//阻塞
     }
 }

@@ -32,6 +32,7 @@ private:
     QLineEdit *accountInput;
     QLineEdit *passwordInput;
     QString identityType;
+
     QVector<QPushButton*> btnVec;
     bool correct(QString id,QString password);
 public slots:

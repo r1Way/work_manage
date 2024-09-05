@@ -22,14 +22,18 @@ QString user_account;
 QString PATH;
 QString user_identity;
 
+//database
+QString SET_HOST_NAME="127.0.0.1";
+QString SET_DATABASE_NAME="Mysql";
+QString SET_USER_NAME="root";
+QString SET_PASSWORD="111111";
+
 int main(int argc, char *argv[])
 {
     //获取当前路径
     QDir dir(QDir::currentPath());
     PATH=dir.path()+"/data";
-    qDebug()<<PATH;
-
-
+    // qDebug()<<PATH;
     if(!dir.exists("data"))
     {
         dir.mkdir("data");    //创建文件夹（名为Images）
@@ -52,10 +56,10 @@ int main(int argc, char *argv[])
         db = QSqlDatabase::addDatabase("QODBC");
     }
     // 设置 DSN
-    db.setHostName("127.0.0.1");
-    db.setDatabaseName("Mysql");
-    db.setUserName("root");
-    db.setPassword("111111"); //用数据库实际账号密码代替
+    db.setHostName(SET_HOST_NAME);
+    db.setDatabaseName(SET_DATABASE_NAME);
+    db.setUserName(SET_USER_NAME);
+    db.setPassword(SET_PASSWORD); //用数据库实际账号密码代替
     // 打开数据库连接
     if (!db.open())
     {

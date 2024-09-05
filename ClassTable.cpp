@@ -206,7 +206,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
     if(item!=nullptr)
     {
             int row=item->row();
-        QMenu *contextMenu=new QMenu(tr("Context menu"), this);
+        QMenu contextMenu(tr("Context menu"), this);
         qDebug()<<"ClassTable::showContextMenu: row="<<row;
 
         //action1 删除此行
@@ -244,10 +244,10 @@ void ClassTable::showContextMenu(const QPoint &pos)
                 }
 
             });
-        contextMenu->addAction(action1);
+        contextMenu.addAction(action1);
 
         QMenu *addMenu=new QMenu("添加");
-        contextMenu->addMenu(addMenu);
+        contextMenu.addMenu(addMenu);
 
 
         //action2 添加学生
@@ -419,7 +419,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
             });
 
         QMenu *partMenu=new QMenu("查看组成");
-        contextMenu->addMenu(partMenu);
+        contextMenu.addMenu(partMenu);
 
         //教师组成
         QAction *action4=new QAction("教师组成",this);
@@ -456,7 +456,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
         partMenu->addAction(action5);
 
         QMenu *removeMenu=new QMenu("删除");
-        contextMenu->addMenu(removeMenu);
+        contextMenu.addMenu(removeMenu);
 
         QAction *action6=new QAction("删除教师");
         removeMenu->addAction(action6);
@@ -573,7 +573,64 @@ void ClassTable::showContextMenu(const QPoint &pos)
 
                 });
 
-        contextMenu->exec(tableWidget->mapToGlobal(pos));
+        QAction *action8=new QAction("修改此行",this);
+        connect(action8,&QAction::triggered,this,[this,row]()
+                {
+                    QDialog *dialog=new QDialog;
+                    QVBoxLayout *mainLayout=new QVBoxLayout;
+                    dialog->setLayout(mainLayout);
+                    QString idRow=this->tableWidget->item(row,0)->text();
+                    QString nameRow=this->tableWidget->item(row,1)->text();
+                    QString descRow=this->tableWidget->item(row,2)->text();
+
+                    QFont font;
+                    font.setPointSize(12);
+                    //姓名
+                    QHBoxLayout *layout1=new QHBoxLayout;
+                    QLabel * name=new QLabel("姓名");
+                    QLineEdit *nameEdit=new QLineEdit;
+                    nameEdit->setText(nameRow);
+                    name->setFont(font);
+                    layout1->addWidget(name);
+                    layout1->addWidget(nameEdit);
+
+                    //描述
+                    QHBoxLayout *layout3=new QHBoxLayout;
+                    QLabel *desc=new QLabel("专业");
+                    QLineEdit *descEdit=new QLineEdit;
+                    descEdit->setText(descRow);
+                    desc->setFont(font);
+                    layout3->addWidget(desc);
+                    layout3->addWidget(descEdit);
+
+                    mainLayout->addLayout(layout1);
+                    mainLayout->addLayout(layout3);
+
+                    QPushButton *ensure=new QPushButton("保存");
+                    mainLayout->addWidget(ensure);
+
+                    connect(ensure,&QPushButton::clicked,this,[this,dialog,idRow,nameEdit,descEdit,row](){
+                        QSqlQuery query;
+                        query.exec(QString("UPDATE class "
+                                           "SET name='%1',description='%2' "
+                                           "WHERE class_id=%3").arg(nameEdit->text()).arg(descEdit->text()).arg(idRow));
+                        QMessageBox messageBox;
+                        messageBox.setWindowIcon(QIcon("://img/icopng"));
+                        messageBox.setWindowTitle("编辑验证");
+                        messageBox.setText("保存成功。");
+                        messageBox.setIcon(QMessageBox::Warning);
+                        messageBox.setStandardButtons(QMessageBox::Ok);
+                        messageBox.exec();
+                        this->tableWidget->item(row,1)->setText(nameEdit->text());
+                        this->tableWidget->item(row,2)->setText(descEdit->text());
+                        dialog->close();
+                    });
+
+                    dialog->show();
+                });
+        contextMenu.addAction(action8);
+
+        contextMenu.exec(tableWidget->mapToGlobal(pos));
     }
 
 }
