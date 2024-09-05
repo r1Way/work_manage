@@ -2,6 +2,7 @@
 
 Login::Login()
 {
+
     //图片
     setWindowIcon(QIcon("://img/icopng"));
     setWindowTitle("C++作业管理系统");
@@ -15,13 +16,22 @@ Login::Login()
     QVBoxLayout * mainLayOut=new QVBoxLayout;
     backLayout->addLayout(mainLayOut);
 
+    //设置
+    set=new QPushButton;
+    set->setIcon(QIcon("://img/set.png"));
+    QHBoxLayout *topLayout=new QHBoxLayout;
+    QSpacerItem *spacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    topLayout->addSpacerItem(spacer);
+    topLayout->addWidget(set);
+    mainLayOut->addLayout(topLayout);
+    connect(set,&QPushButton::clicked,this,&Login::settings);
+
     // 创建标题标签
     QLabel *titleLabel = new QLabel("C++作业管理系统");
     titleLabel->setStyleSheet("font-size: 24px; font-weight: bold; font-family: 'Microsoft YaHei'; text-align: center;");
     titleLabel->setAlignment(Qt::AlignCenter);
     mainLayOut->addWidget(titleLabel);
 
-    //设置
 
 
     // 创建三个按钮
@@ -129,6 +139,7 @@ Login::Login()
             pressColor(btn);
         });
     }
+
 }
 
 void Login::handleLogin()
@@ -283,4 +294,113 @@ void Login::pressColor(QPushButton *btn)
                                 "}");
         }
     }
+}
+
+void Login::settings()
+{
+    QFont font;
+    font.setPointSize(12);
+
+    QDialog *dialog=new QDialog;
+    QVBoxLayout *mainLayout=new QVBoxLayout;
+    dialog->setLayout(mainLayout);
+
+    //重置
+
+    QHBoxLayout *topLayout=new QHBoxLayout;
+    mainLayout->addLayout(topLayout);
+
+    QSpacerItem *spacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    topLayout->addSpacerItem(spacer);
+    QPushButton *reset=new QPushButton("重置");
+    topLayout->addWidget(reset);
+    reset->setIcon(QIcon("://img/reset.png"));
+
+    //读取数据库信息
+    QStringList lines;
+    QFile file(PATH+"/databaseInfo.txt");
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&file);
+
+        while (!in.atEnd())
+        {
+            QString line = in.readLine();
+            lines.append(line);
+        }
+        file.close();
+    }
+    else
+    {
+        QMessageBox messageBox;
+        messageBox.setWindowIcon(QIcon("://img/icopng"));
+        messageBox.setWindowTitle("数据库信息");
+        messageBox.setText("数据库信息打开失败。");
+        messageBox.setIcon(QMessageBox::Warning);
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        messageBox.exec();
+    }
+
+    //各个信息
+    QVector<QHBoxLayout* > hLayouts;
+    QVector<QLabel*> labels;
+    QVector<QLineEdit *> edits;
+    int nums=4;
+    QStringList list={"setHostName","setDatabaseName","setUserName","setPassword"};//标签
+
+    for(int i=0;i<nums;i++)
+    {
+        hLayouts.push_back(new QHBoxLayout);
+        labels.push_back(new QLabel);
+        edits.push_back(new QLineEdit);
+
+        mainLayout->addLayout(hLayouts[i]);
+        hLayouts[i]->addWidget(labels[i]);
+
+        labels[i]->setText(list[i]);
+        labels[i]->setFont(font);
+
+        hLayouts[i]->addWidget(edits[i]);
+        edits[i]->setText(lines[i]);
+        edits[i]->setFont(font);
+    }
+
+    QPushButton *save=new QPushButton("保存");
+    save->setFont(font);
+    mainLayout->addWidget(save);
+    // QString SET_HOST_NAME="127.0.0.1";
+    // QString SET_DATABASE_NAME="Mysql";
+    // QString SET_USER_NAME="root";
+    // QString SET_PASSWORD="111111";
+
+    connect(reset,&QPushButton::clicked,[lines,edits](){
+        edits[0]->setText(SET_HOST_NAME);
+        edits[1]->setText(SET_DATABASE_NAME);
+        edits[2]->setText(SET_USER_NAME);
+        edits[3]->setText(SET_PASSWORD);
+    });
+
+    connect(save,&QPushButton::clicked,[dialog,edits]()
+    {
+        QFile file(PATH+"/databaseInfo.txt");
+        // 打开文件进行写入
+        if (file.open(QIODevice::WriteOnly))
+        {
+            QTextStream out(&file);
+            for(int i=0;i<edits.size();i++)
+            {
+                out<<edits[i]->text()<<"\n";
+            }
+            file.close();
+            QMessageBox messageBox;
+            messageBox.setWindowIcon(QIcon("://img/icopng"));
+            messageBox.setWindowTitle("数据库信息输入");
+            messageBox.setText("数据库信息保存成功，请退出重新打开程序。");
+            messageBox.setIcon(QMessageBox::Warning);
+            messageBox.setStandardButtons(QMessageBox::Ok);
+            messageBox.exec();
+            dialog->close();
+        }
+    });
+    dialog->show();
 }

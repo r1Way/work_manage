@@ -19,6 +19,11 @@
 extern QString user_account;
 extern QSqlDatabase db;
 extern QString user_identity;
+
+extern QString SET_HOST_NAME;
+extern QString SET_DATABASE_NAME;
+extern QString SET_USER_NAME;
+extern QString SET_PASSWORD;
 class Login : public QDialog
 {
 public:
@@ -32,11 +37,12 @@ private:
     QLineEdit *accountInput;
     QLineEdit *passwordInput;
     QString identityType;
-
+    QPushButton *set;
     QVector<QPushButton*> btnVec;
     bool correct(QString id,QString password);
 public slots:
     void pressColor(QPushButton * btn);
+    void settings();
 };
 
 #endif // LOGIN_H

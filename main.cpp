@@ -30,6 +30,7 @@ QString SET_PASSWORD="111111";
 
 int main(int argc, char *argv[])
 {
+    QApplication a(argc, argv);
     //获取当前路径
     QDir dir(QDir::currentPath());
     PATH=dir.path()+"/data";
@@ -45,7 +46,48 @@ int main(int argc, char *argv[])
         qDebug()<<QString("文件夹%1已存在！").arg("data");
     }
 
-    QApplication a(argc, argv);
+    //查找数据库信息
+    QFile file(PATH+"/databaseInfo.txt");
+    // 检查文件是否存在
+    if (!file.exists())
+    {
+        // 打开文件进行写入
+        if (file.open(QIODevice::WriteOnly))
+        {
+            QTextStream out(&file);
+
+            out <<SET_HOST_NAME<<"\n";
+            out <<SET_DATABASE_NAME<<"\n";
+            out <<SET_USER_NAME<<"\n";
+            out <<SET_PASSWORD<<"\n";
+            file.close();
+        }
+    }
+
+    QStringList lines;
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&file);
+
+        while (!in.atEnd())
+        {
+            QString line = in.readLine();
+            lines.append(line);
+        }
+        file.close();
+    }
+    else
+    {
+        QMessageBox messageBox;
+        messageBox.setWindowIcon(QIcon("://img/icopng"));
+        messageBox.setWindowTitle("数据库信息");
+        messageBox.setText("数据库信息打开失败。");
+        messageBox.setIcon(QMessageBox::Warning);
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        messageBox.exec();
+    }
+
+
     // 创建 ODBC 数据库对象
     if(QSqlDatabase::contains("qt_sql_default_connection"))
     {
@@ -55,21 +97,27 @@ int main(int argc, char *argv[])
     {
         db = QSqlDatabase::addDatabase("QODBC");
     }
+
     // 设置 DSN
-    db.setHostName(SET_HOST_NAME);
-    db.setDatabaseName(SET_DATABASE_NAME);
-    db.setUserName(SET_USER_NAME);
-    db.setPassword(SET_PASSWORD); //用数据库实际账号密码代替
+    db.setHostName(lines[0]);
+    db.setDatabaseName(lines[1]);
+    db.setUserName(lines[2]);
+    db.setPassword(lines[3]); //用数据库实际账号密码代替
     // 打开数据库连接
     if (!db.open())
     {
         qDebug("打开数据库连接失败" );
+        QMessageBox messageBox;
+        messageBox.setWindowIcon(QIcon("://img/icopng"));
+        messageBox.setWindowTitle("数据库验证");
+        messageBox.setText("数据库连接失败，请修改配置。");
+        messageBox.setIcon(QMessageBox::Warning);
+        messageBox.setStandardButtons(QMessageBox::Ok);
+        messageBox.exec();
     }
 
     Login login;
     login.show();
-    // LabelEdit edit;
-    // edit.show();
 
     return a.exec();
 }
