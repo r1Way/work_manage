@@ -219,9 +219,15 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
                         QString sql=QString("delete from homework_class where class_id=%1 and name='%2';").arg(classId.toInt()).arg(workName);
                         query_remove.exec(sql);
 
-                        emit batchBtn->clicked();
+                        QDir dir(QString(PATH+"/%1/%2").arg(classId).arg(workName));
+                        //文件删除
+                        if (dir.exists())
+                        {
+                            dir.removeRecursively();
+                        }
                     }
                 }
+                emit batchBtn->clicked();
             });
         }
         else
@@ -419,6 +425,12 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
         int row=item->row();
         QString studentId=tableWindow3->tableWidget->item(row,0)->text();
         QString studentName=tableWindow3->tableWidget->item(row,1)->text();
+        //检测文件夹是否存在
+        QDir dir(PATH+"/"+classId+"/"+homeworkName+"/"+studentId);
+        if(!dir.exists())
+        {
+            dir.mkpath(PATH+"/"+classId+"/"+homeworkName+"/"+studentId);
+        }
         studentDoubleClicked(studentName,studentId,classId,homeworkName,stackedWidget,tableWindow3);
     });
 }
@@ -440,6 +452,7 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
 
     QTextEdit *textEdit=new QTextEdit;
     labelEditIntro->mainLayout->addWidget(textEdit);
+
     //获取课程信息
     QSqlQuery query;
     query.exec(QString("SELECT * FROM class WHERE class.class_id=%1").arg(classId));

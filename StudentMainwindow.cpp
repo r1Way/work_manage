@@ -176,6 +176,12 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
     {
         int row=item->row();
         QString homeworkName=tableWindow2->tableWidget->item(row,0)->text();
+        //检测文件夹是否存在
+        // QDir dir(PATH+"/"+classId+"/"+homeworkName);
+        // if(!dir.exists())
+        // {
+        //     dir.mkpath(PATH+"/"+classId+"/"+homeworkName);
+        // }
         homeworkDoubleClicked(classId,homeworkName,stackedWidget,tableWindow2);
     });
 }
@@ -189,6 +195,7 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     FileWindow *fileWindow=new FileWindow;
     stackedWidget->addWidget(fileWindow);
     QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
+    qDebug()<<"StudentMainwindow::homeworkDoubleClicked   "<<filePath;
     fileWindow->import(filePath);
     stackedWidget->setCurrentIndex(2);
 
