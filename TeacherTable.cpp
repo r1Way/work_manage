@@ -160,10 +160,11 @@ TeacherTable::TeacherTable()
                                 for (int i = tableWidget->rowCount() - 1; i >= 0; --i)
                                 {
                                     QCheckBox *checkBox = qobject_cast<QCheckBox*>(tableWidget->cellWidget(i, cols));
+
                                     if (checkBox && checkBox->isChecked())
                                     {
                                         QSqlQuery query_remove;
-                                        QString id=tableWidget->takeItem(i,0)->text();
+                                        QString id=tableWidget->item(i,0)->text();
                                         //tableWidget中删除
                                         tableWidget->removeRow(i);
                                         //sql中删除
@@ -171,9 +172,9 @@ TeacherTable::TeacherTable()
                                         query_remove.exec(sql);
                                         sql=QString("delete from pass where id=%1;").arg(id.toInt());
                                         query_remove.exec(sql);
-                                        emit batch->clicked();
                                     }
                                 }
+                                emit batch->clicked();
                             });
 
                 }
@@ -266,6 +267,8 @@ void TeacherTable::showContextMenu(const QPoint &pos)
     connect(action3,&QAction::triggered,this,[this,row]()
             {
                 QDialog *dialog=new QDialog;
+                dialog->setWindowIcon(QIcon("://img/icopng"));
+                dialog->setWindowTitle("修改教师信息");
                 QVBoxLayout *mainLayout=new QVBoxLayout;
                 dialog->setLayout(mainLayout);
                 QString idRow=this->tableWidget->item(row,0)->text();

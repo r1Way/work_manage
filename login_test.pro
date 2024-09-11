@@ -18,7 +18,6 @@ SOURCES += \
     Highlighter.cpp \
     LabelEdit.cpp \
     Login.cpp \
-    MySplitter.cpp \
     MyTableWidget.cpp \
     StudentMainwindow.cpp \
     StudentTable.cpp \
@@ -37,7 +36,6 @@ HEADERS += \
     Highlighter.h \
     LabelEdit.h \
     Login.h \
-    MySplitter.h \
     MyTableWidget.h \
     StudentMainwindow.h \
     StudentTable.h \

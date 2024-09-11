@@ -160,7 +160,7 @@ StudentTable::StudentTable():MyTableWidget()
                     if (checkBox && checkBox->isChecked())
                     {
                         QSqlQuery query_remove;
-                        QString id=tableWidget->takeItem(i,0)->text();
+                        QString id=tableWidget->item(i,0)->text();
                         //tableWidget中删除
                         tableWidget->removeRow(i);
                         //sql中删除
@@ -168,9 +168,9 @@ StudentTable::StudentTable():MyTableWidget()
                         query_remove.exec(sql);
                         sql=QString("delete from pass where id=%1;").arg(id.toInt());
                         query_remove.exec(sql);
-                        emit batch->clicked();
                     }
                 }
+                emit batch->clicked();
             });
 
         }
@@ -265,6 +265,8 @@ void StudentTable::showContextMenu(const QPoint &pos)
     connect(action3,&QAction::triggered,this,[this,row]()
     {
         QDialog *dialog=new QDialog;
+        dialog->setWindowIcon(QIcon("://img/icopng"));
+        dialog->setWindowTitle("修改学生信息");
         QVBoxLayout *mainLayout=new QVBoxLayout;
         dialog->setLayout(mainLayout);
         QString idRow=this->tableWidget->item(row,0)->text();
@@ -308,7 +310,7 @@ void StudentTable::showContextMenu(const QPoint &pos)
             messageBox.setIcon(QMessageBox::Warning);
             messageBox.setStandardButtons(QMessageBox::Ok);
             messageBox.exec();
-            this->tableWidget->item(row,1)->setText(majorEdit->text());
+            this->tableWidget->item(row,1)->setText(nameEdit->text());
             this->tableWidget->item(row,2)->setText(majorEdit->text());
             dialog->close();
         });

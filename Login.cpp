@@ -148,21 +148,22 @@ void Login::handleLogin()
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("提示"));
+        msgBox.setWindowIcon(QIcon("://img/icopng"));
         msgBox.setText(tr("请选择你的身份！"));
         msgBox.setIcon(QMessageBox::Information);  // 这里设置了警告图标
         msgBox.setStandardButtons(QMessageBox::Ok);
 
-        // 可选：自定义样式
-        msgBox.setStyleSheet(
-            "QMessageBox {"
-            "background-color: white;"  // 设置背景颜色
-            "color: white;"             // 设置文字颜色
-            "}"
-            "QPushButton {"
-            "color: white;"             // 按钮文字颜色
-            "background-color: #A9A9A9;"  // 按钮背景颜色
-            "}"
-            );
+        // // 可选：自定义样式
+        // msgBox.setStyleSheet(
+        //     "QMessageBox {"
+        //     "background-color: white;"  // 设置背景颜色
+        //     "color: white;"             // 设置文字颜色
+        //     "}"
+        //     "QPushButton {"
+        //     "color: white;"             // 按钮文字颜色
+        //     "background-color: #A9A9A9;"  // 按钮背景颜色
+        //     "}"
+        //     );
 
         msgBox.exec();  // 显示消息框
     }
@@ -171,14 +172,11 @@ void Login::handleLogin()
         //用户名或密码正确
         //update
         //test begin
-        //if(correct(accountInput->text(),passwordInput->text()))
-        if(true)// test end
+        if(correct(accountInput->text(),passwordInput->text()))
+        // if(true)// test end
         {
             this->close();
 
-            //test begin
-            // identityType="teacher";
-            //test end
             if (identityType=="admin")
             {
                 ::user_account=accountInput->text();
@@ -188,16 +186,14 @@ void Login::handleLogin()
             }
             else if(identityType=="teacher")
             {
-                // ::user_account=accountInput->text();
-                ::user_account="113210";
+                ::user_account=accountInput->text();
                 ::user_identity="teacher";
                 TeacherMainWindow *window=new TeacherMainWindow;
                 window->show();
             }
             else if(identityType=="student")
             {
-                // ::user_account=accountInput->text();
-                ::user_account="17514";
+                ::user_account=accountInput->text();
                 ::user_identity="student";
                 StudentMainwindow * window=new StudentMainwindow;
                 window->show();
@@ -211,21 +207,22 @@ void Login::handleLogin()
         {
             QMessageBox msgBox;
             msgBox.setWindowTitle(tr("登录失败"));
+            msgBox.setWindowIcon(QIcon("://img/icopng"));
             msgBox.setText(tr("用户名或密码输入错误！"));
             msgBox.setIcon(QMessageBox::Warning);  // 这里设置了警告图标
             msgBox.setStandardButtons(QMessageBox::Ok);
 
-            // 可选：自定义样式
-            msgBox.setStyleSheet(
-                "QMessageBox {"
-                "background-color: #2E2E2E;"  // 设置背景颜色
-                "color: #FFFFFF;"             // 设置文字颜色
-                "}"
-                "QPushButton {"
-                "color: #000000;"             // 按钮文字颜色
-                "background-color: #A9A9A9;"  // 按钮背景颜色
-                "}"
-                );
+            // // 可选：自定义样式
+            // msgBox.setStyleSheet(
+            //     "QMessageBox {"
+            //     "background-color: #2E2E2E;"  // 设置背景颜色
+            //     "color: #FFFFFF;"             // 设置文字颜色
+            //     "}"
+            //     "QPushButton {"
+            //     "color: #000000;"             // 按钮文字颜色
+            //     "background-color: #A9A9A9;"  // 按钮背景颜色
+            //     "}"
+            //     );
 
             msgBox.exec();  // 显示消息框
             this->accountInput->clear();
@@ -257,7 +254,7 @@ bool Login::correct(QString id, QString password)
     {
         if(query.isActive())
         {
-            if(query.value(0).toInt()==1)
+            if(query.value(0).toInt()!=0)
             {
                 return true;
             }
@@ -267,7 +264,6 @@ bool Login::correct(QString id, QString password)
             }
         }
     }
-    qDebug()<<"Login::correct";
     return false;
 }
 
@@ -302,11 +298,12 @@ void Login::settings()
     font.setPointSize(12);
 
     QDialog *dialog=new QDialog;
+    dialog->setWindowIcon(QIcon("://img/icopng"));
+    dialog->setWindowTitle("数据库基本信息");
     QVBoxLayout *mainLayout=new QVBoxLayout;
     dialog->setLayout(mainLayout);
 
     //重置
-
     QHBoxLayout *topLayout=new QHBoxLayout;
     mainLayout->addLayout(topLayout);
 

@@ -160,18 +160,19 @@ ClassTable::ClassTable()
                                 for (int i = tableWidget->rowCount() - 1; i >= 0; --i)
                                 {
                                     QCheckBox *checkBox = qobject_cast<QCheckBox*>(tableWidget->cellWidget(i, cols));
+                                    // qDebug()<<"checkBox is checked"<<i<<checkBox->isChecked();
                                     if (checkBox && checkBox->isChecked())
                                     {
                                         QSqlQuery query_remove;
-                                        QString id=tableWidget->takeItem(i,0)->text();
+                                        QString id=tableWidget->item(i,0)->text();
                                         //tableWidget中删除
                                         tableWidget->removeRow(i);
                                         //sql中删除
                                         QString sql=QString("delete from class where class_id=%1;").arg(id.toInt());
                                         query_remove.exec(sql);
-                                        emit batch->clicked();
                                     }
                                 }
+                                emit batch->clicked();
                             });
 
                 }
@@ -428,6 +429,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
             QString classId=tableWidget->item(row,0)->text();
             QStringList list1={"工号","姓名","专业"};
             TableWindow *tableWindow1=new TableWindow(list1);//显示教师
+            tableWindow1->setWindowTitle("班级教师信息");
             tableWindow1->setWindowIcon(QIcon("://img/icopng"));
             QString sql=QString("SELECT teacher.teacher_id,teacher.name,teacher.major FROM teacher "
                                   "JOIN class_teacher ON class_teacher.teacher_id=teacher.teacher_id "
@@ -445,6 +447,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
             QString classId=tableWidget->item(row,0)->text();
             QStringList list1={"学号","姓名","专业"};
             TableWindow *tableWindow1=new TableWindow(list1);//显示学生
+            tableWindow1->setWindowTitle("班级学生信息");
             tableWindow1->setWindowIcon(QIcon("://img/icopng"));
             QString sql=QString("SELECT student.student_id,student.name,student.major FROM student "
                                   "JOIN class_student ON class_student.student_id=student.student_id "
@@ -579,6 +582,8 @@ void ClassTable::showContextMenu(const QPoint &pos)
                     QDialog *dialog=new QDialog;
                     QVBoxLayout *mainLayout=new QVBoxLayout;
                     dialog->setLayout(mainLayout);
+                    dialog->setWindowIcon(QIcon("://img/icopng"));
+                    dialog->setWindowTitle("修改课程信息");
                     QString idRow=this->tableWidget->item(row,0)->text();
                     QString nameRow=this->tableWidget->item(row,1)->text();
                     QString descRow=this->tableWidget->item(row,2)->text();

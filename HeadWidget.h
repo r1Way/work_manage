@@ -15,6 +15,7 @@ class HeadWidget : public QWidget
     Q_OBJECT
 public:
     explicit HeadWidget(QWidget *parent = nullptr);
+    QPushButton *changePass;
 
 signals:
 };

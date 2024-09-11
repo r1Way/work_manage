@@ -7,6 +7,8 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     this->showMaximized();
     this->setWindowFlags(Qt::Dialog|Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
 
+    setWindowIcon(QIcon("://img/icopng"));
+    setWindowTitle("C++作业管理系统");
     // 创建中心小部件
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -18,6 +20,83 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     HeadWidget *headWidget=new HeadWidget();
     mainLayout->addWidget(headWidget);
 
+    //修改密码
+    connect(headWidget->changePass,&QPushButton::clicked,[this]()
+            {
+                QFont font_dialog;
+                font_dialog.setPointSize(13);
+
+                QDialog *dialog=new QDialog(this);
+                dialog->setWindowTitle("修改密码");
+                dialog->setWindowIcon(QIcon("://img/icopng"));
+
+                QVBoxLayout *dialogLayout=new QVBoxLayout;
+                dialog->setLayout(dialogLayout);
+
+                QLabel *oldPassLabel=new QLabel("请输入旧密码");
+                dialogLayout->addWidget(oldPassLabel);
+                oldPassLabel->setFont(font_dialog);
+
+                QLineEdit *oldPassEdit=new QLineEdit;
+                dialogLayout->addWidget(oldPassEdit);
+                oldPassEdit->setFont(font_dialog);
+
+                QLabel *newPassLabel=new QLabel("请输入新密码");
+                dialogLayout->addWidget(newPassLabel);
+                newPassLabel->setFont(font_dialog);
+
+                QLineEdit *newPassEdit=new QLineEdit;
+                dialogLayout->addWidget(newPassEdit);
+                newPassEdit->setFont(font_dialog);
+
+                QPushButton *ensure=new QPushButton("确认");
+                dialogLayout->addWidget(ensure);
+                connect(ensure,&QPushButton::clicked,[dialog,oldPassEdit,newPassEdit]()
+                        {
+                            QSqlQuery query;
+                            QString sql=QString("SELECT COUNT(*) FROM pass "
+                                                  "WHERE user='teacher' AND "
+                                                  "id=%1 AND "
+                                                  "password='%2'").arg(user_account).arg(oldPassEdit->text());
+                            query.exec(sql);
+                            int nums=-1;
+                            while(query.next())
+                            {
+                                nums=query.value(0).toInt();
+                            }
+
+                            if(nums==0)
+                            {
+                                QMessageBox messageBox;
+                                messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                messageBox.setWindowTitle("更改密码验证");
+                                messageBox.setText("旧密码输入错误，请重新输入。");
+                                messageBox.setIcon(QMessageBox::Warning);
+                                messageBox.setStandardButtons(QMessageBox::Ok);
+                                messageBox.exec();
+                            }
+                            else
+                            {
+                                sql=QString("UPDATE pass "
+                                              "SET password='%1' "
+                                              "WHERE user='teacher' AND "
+                                              "id=%2 ").arg(newPassEdit->text()).arg(user_account);
+
+                                query.exec(sql);
+
+                                QMessageBox messageBox;
+                                messageBox.setWindowIcon(QIcon("://img/icopng"));
+                                messageBox.setWindowTitle("更改密码验证");
+                                messageBox.setText("更改密码成功，请重新登录。");
+                                messageBox.setIcon(QMessageBox::Warning);
+                                messageBox.setStandardButtons(QMessageBox::Ok);
+                                messageBox.exec();
+                                dialog->close();
+                            }
+                        });
+                dialog->show();
+            });
+
     //table
     QStackedWidget *stackedWidget =new QStackedWidget;
     mainLayout->addWidget(stackedWidget);
@@ -25,7 +104,7 @@ TeacherMainWindow::TeacherMainWindow(QWidget *parent)
     tableWindow=new TableWindow(list);
     tableWindow->searchEdit->setPlaceholderText("输入课程代号、名称、描述以筛选");//设置edit
     tableWindow->mainSplitter->setSizes(QList<int>() <<1<<10000);
-    // qDebug()<<"front"<<user_account<<"back";//check
+
     QString sql=QString("SELECT class.class_id,class.name,class.description from class "
                           "JOIN class_teacher ON class.class_id=class_teacher.class_id "
                           "WHERE class_teacher.teacher_id=%1;").arg(user_account.toInt());
@@ -52,6 +131,11 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
     tableWindow2->searchEdit->setPlaceholderText("输入作业名称、介绍、日期、时间以筛选");//设置edit
     stackedWidget->addWidget(tableWindow2);
     stackedWidget->setCurrentIndex(1);
+    //对时间进行修改
+    for(int i=0;i<tableWindow2->tableWidget->rowCount();i++)
+    {
+        tableWindow2->tableWidget->item(i,3)->setText(tableWindow2->tableWidget->item(i,3)->text().left(8));
+    }
 
     //left layout
 
@@ -167,8 +251,103 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
         QString homeworkName=tableWindow2->tableWidget->item(row,0)->text();
         homeworkDoubleClicked(classId,homeworkName,stackedWidget,tableWindow2);
     });
+    //只有将其设置成Qt::CustomContextMenu才会发出customContextMenuRequested信号
+   tableWindow2->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    //鼠标右键菜单
+    connect(tableWindow2->tableWidget, &QTableWidget::customContextMenuRequested, [classId,tableWindow2](const QPoint &pos)
+            {
+        //菜单栏
 
+        QTableWidgetItem *item=tableWindow2->tableWidget->itemAt(pos);
+        qDebug()<<"right menu open teacehrtable";
+        if(item!=nullptr)
+        {
+            QMenu contextMenu(tr("Context menu"), tableWindow2->tableWidget);
+            int row=item->row();
+            QAction *action=new QAction("修改此行",tableWindow2->tableWidget);
+            connect(action,&QAction::triggered,tableWindow2->tableWidget,[tableWindow2,classId,row]()
+                    {
+                        QDialog *dialog=new QDialog;
+                        dialog->setWindowIcon(QIcon("://img/icopng"));
+                        dialog->setWindowTitle("修改作业信息");
+                        QVBoxLayout *mainLayout=new QVBoxLayout;
+                        dialog->setLayout(mainLayout);
+                        QString nameRow=tableWindow2->tableWidget->item(row,0)->text();
+                        QString descRow=tableWindow2->tableWidget->item(row,1)->text();
+                        QString dateRow=tableWindow2->tableWidget->item(row,2)->text();
+                        QString timeRow=tableWindow2->tableWidget->item(row,3)->text();
+
+                        qDebug()<<nameRow<<" "<<descRow<<" "<<dateRow<<" "<<timeRow;
+                        QFont font;
+                        font.setPointSize(12);
+
+                        QHBoxLayout *layout1=new QHBoxLayout;
+                        QHBoxLayout *layout2=new QHBoxLayout;
+                        QHBoxLayout *layout3=new QHBoxLayout;
+
+                        QLabel *description=new QLabel("描述");
+                        description->setFont(font);
+                        QLineEdit *descriptionEdit=new QLineEdit;
+                        descriptionEdit->setText(descRow);
+                        descriptionEdit->setFont(font);
+                        layout1->addWidget(description);
+                        layout1->addWidget(descriptionEdit);
+                        mainLayout->addLayout(layout1);
+
+                        QLabel *date=new QLabel("截止日期");
+                        date->setFont(font);
+                        QDateEdit *dateEdit=new QDateEdit;
+                        dateEdit->setDate(QDate::fromString(dateRow, "yyyy-MM-dd"));
+                        dateEdit->setFixedSize(150,30);
+                        dateEdit->setFont(font);
+                        layout2->addWidget(date);
+                        layout2->addWidget(dateEdit);
+                        mainLayout->addLayout(layout2);
+
+                        QLabel *time =new QLabel("截止时间");
+                        time->setFont(font);
+                        QTimeEdit *timeEdit=new QTimeEdit;
+                        timeEdit->setDisplayFormat("hh:mm:ss");
+                        timeEdit->setFixedSize(150,30);
+                        timeEdit->setTime(QTime::fromString(timeRow,"hh:mm:ss"));
+                        timeEdit->setFont(font);
+                        layout3->addWidget(time);
+                        layout3->addWidget(timeEdit);
+                        mainLayout->addLayout(layout3);
+
+                        QPushButton *ensure=new QPushButton("保存");
+                        ensure->setFont(font);
+                        mainLayout->addWidget(ensure);
+
+                        connect(ensure,&QPushButton::clicked,[tableWindow2,dialog,nameRow,descriptionEdit,dateEdit,timeEdit,classId,row](){
+                            QSqlQuery query;
+                            query.exec(QString("UPDATE homework_class "
+                                               "SET description='%1' , "
+                                               "d='%2' , "
+                                               "t='%3' "
+                                               "WHERE class_id=%4 AND "
+                                               "name='%5' ").arg(descriptionEdit->text()).arg(dateEdit->date().toString("yyyy-MM-dd")).arg(timeEdit->time().toString("hh:mm:ss")).arg(classId).arg(nameRow));
+                            QMessageBox messageBox;
+                            messageBox.setWindowIcon(QIcon("://img/icopng"));
+                            messageBox.setWindowTitle("编辑验证");
+                            messageBox.setText("保存成功。");
+                            messageBox.setIcon(QMessageBox::Warning);
+                            messageBox.setStandardButtons(QMessageBox::Ok);
+                            messageBox.exec();
+                            tableWindow2->tableWidget->item(row,1)->setText(descriptionEdit->text());
+                            tableWindow2->tableWidget->item(row,2)->setText(dateEdit->date().toString("yyyy-MM-dd"));
+                            tableWindow2->tableWidget->item(row,3)->setText(timeEdit->time().toString("hh:mm:ss"));
+                            dialog->close();
+                        });
+                        dialog->show();
+                    });
+            contextMenu.addAction(action);
+
+            contextMenu.exec(tableWindow2->tableWidget->mapToGlobal(pos));//阻塞
+        }
+
+    });
 }
 
 void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
@@ -434,6 +613,7 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
     QFont font;
     font.setPointSize(12);
     QDialog *dialog=new QDialog;
+    dialog->setWindowTitle("布置作业");
     dialog->setWindowIcon(QIcon("://img/icopng"));
     QVBoxLayout *mainLayout=new QVBoxLayout;
     dialog->setLayout(mainLayout);
@@ -473,6 +653,8 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
     time->setFont(font);
     QTimeEdit *timeEdit=new QTimeEdit;
     timeEdit->setTime(QTime::currentTime());
+    timeEdit->setDisplayFormat("hh:mm:ss");
+    timeEdit->setFixedSize(150,30);
     timeEdit->setFont(font);
     layouts[3]->addWidget(time);
     layouts[3]->addWidget(timeEdit);
@@ -485,10 +667,6 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
         //qDebug()<<classId<<dateEdit->date().toString("yyyy-MM-dd")<<"   "<<timeEdit->time().toString("HH:mm:ss");
         if(nameEdit->text()!="")//作业名是否为空
         {
-
-                //添加到表
-                addHomework(classId,nameEdit->text(),descriptionEdit->text(),dateEdit->date().toString("yyyy-MM-dd"),timeEdit->time().toString("HH:mm:ss"),tableWindow2);
-                //添加到数据库
                 QSqlQuery querySameName;
                 querySameName.exec(QString("SELECT COUNT(*) FROM homework_class "
                                    "WHERE class_id=%1 and "
@@ -510,6 +688,9 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
                 }
                 else
                 {
+                    //添加到表
+                    addHomework(classId,nameEdit->text(),descriptionEdit->text(),dateEdit->date().toString("yyyy-MM-dd"),timeEdit->time().toString("HH:mm:ss"),tableWindow2);
+                     //添加到数据库
                     QSqlQuery query;
                     QString sql=QString("INSERT INTO homework_class value(%1,'%2','%3','%4','%5')")
                                       .arg(classId)
@@ -547,6 +728,7 @@ void TeacherMainWindow::addExample(QString classId, QString homeworkName)
     font.setPointSize(12);
 
     QDialog *dialog=new QDialog;
+    dialog->setWindowTitle("设置测试样例");
     dialog->setWindowIcon(QIcon("://img/icopng"));
     QVBoxLayout *mainLayout=new QVBoxLayout;
     dialog->setLayout(mainLayout);

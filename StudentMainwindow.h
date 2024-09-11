@@ -18,6 +18,7 @@
 #include <QSqlQuery>
 #include <QProcess>
 #include <QByteArray>
+#include <QMessageBox>
 #include "HeadWidget.h"
 #include "TableWindow.h"
 #include "FileWindow.h"

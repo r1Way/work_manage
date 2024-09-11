@@ -76,6 +76,7 @@ void TableWindow::connectDataBase(QString select,QString driver,QString hostName
         for(int i=0;i<information.size();i++)
         {
             list.append(query.value(i).toString());
+            // qDebug()<<"TableWindow::connectDataBase"<<list;
         }
         add(list);
     }

@@ -45,6 +45,10 @@ HeadWidget::HeadWidget(QWidget *parent)
         }
     }
 
+    changePass=new QPushButton("更改密码");
+    changePass->setIcon(QIcon("://img/set.png"));
+    font->setPointSize(13);
+    changePass->setFont(*font);
 
     //设置布局
     QHBoxLayout *layOut=new QHBoxLayout(this);
@@ -52,4 +56,5 @@ HeadWidget::HeadWidget(QWidget *parent)
     layOut->addStretch();
     layOut->addWidget(avatar);
     layOut->addWidget(userName);
+    layOut->addWidget(changePass);
 }
