@@ -131,6 +131,11 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
     tableWindow2->connectDataBase(QString("SELECT name,description,"
                           "d,t FROM homework_class "
                           "WHERE class_id=%1;").arg(classId));
+    //对时间进行修改
+    for(int i=0;i<tableWindow2->tableWidget->rowCount();i++)
+    {
+        tableWindow2->tableWidget->item(i,3)->setText(tableWindow2->tableWidget->item(i,3)->text().left(8));
+    }
     stackedWidget->addWidget(tableWindow2);
     stackedWidget->setCurrentIndex(1);
 
@@ -171,11 +176,11 @@ void StudentMainwindow::itemDoubleClicked(QString classId, QStackedWidget *stack
     {
         int row=item->row();
         QString homeworkName=tableWindow2->tableWidget->item(row,0)->text();
-        homeworkDoubleClicked(classId,homeworkName,stackedWidget);
+        homeworkDoubleClicked(classId,homeworkName,stackedWidget,tableWindow2);
     });
 }
 
-void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget)
+void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkName, QStackedWidget *stackedWidget,TableWindow *tableWindow2)
 {
     QFont font;
     font.setPointSize(14);
@@ -221,6 +226,14 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     labelEditInput->mainLayout->addWidget(exampleEdit);
     fileWindow->leftSplitter->addWidget(labelEditInput);
     QString fileName=PATH+QString("/%1/%2/example.txt").arg(classId).arg(homeworkName);
+
+    //检测文件夹是否存在
+    QDir dir(PATH+QString("/%1/%2").arg(classId).arg(homeworkName));
+    if(!dir.exists())
+    {
+        dir.mkpath(PATH+QString("/%1/%2").arg(classId).arg(homeworkName));
+    }
+    //检测文件是否存在
     if (!QFile::exists(fileName))
     {
         qDebug()<<"file not exist";
@@ -260,11 +273,17 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
 
 
     //返回
-    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow]()
+    connect(fileWindow->returnBtn,&QPushButton::clicked,[stackedWidget,fileWindow,tableWindow2]()
     {
         stackedWidget->setCurrentIndex(1);
         stackedWidget->removeWidget(fileWindow);
         fileWindow->deleteLater();
+        tableWindow2->fresh();
+        // 对时间进行修改
+        for(int i=0;i<tableWindow2->tableWidget->rowCount();i++)
+        {
+            tableWindow2->tableWidget->item(i,3)->setText(tableWindow2->tableWidget->item(i,3)->text().left(8));
+        }
     });
 
 
@@ -273,9 +292,9 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
     QPushButton *handInHomework=new QPushButton("提交作业");
     handInHomework->setFont(font);
     fileWindow->searchLayout->insertWidget(0,handInHomework);
-    connect(handInHomework,&QPushButton::clicked,[this,classId,homeworkName]()
+    connect(handInHomework,&QPushButton::clicked,[this,classId,homeworkName,fileWindow]()
     {
-        handIn(classId,homeworkName);
+        handIn(classId,homeworkName,fileWindow);
     });
 
     //search layout
@@ -395,7 +414,7 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
 
 }
 
-void StudentMainwindow::handIn(QString classId, QString homeworkName)
+void StudentMainwindow::handIn(QString classId, QString homeworkName,FileWindow *fileWindow)
 {
     QStringList fileNames= QFileDialog::getOpenFileNames(
         this,
@@ -475,6 +494,9 @@ void StudentMainwindow::handIn(QString classId, QString homeworkName)
                       "name='%5';").arg(date).arg(time).arg(user_account).arg(classId).arg(homeworkName);
         query.exec(sql);
         }
+
+        QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
+        fileWindow->import(filePath);
     }
     else
     {

@@ -124,7 +124,7 @@ ClassTable::ClassTable()
                             }
                         });
 
-                dialog->show();
+                dialog->exec();
 
             });
 
@@ -332,7 +332,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                     messageBox.exec();
                 }
             });
-        dialog->show();
+        dialog->exec();
         });
 
         //添加教师
@@ -416,7 +416,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                         messageBox.exec();
                     }
                 });
-             dialog->show();
+             dialog->exec();
             });
 
         QMenu *partMenu=new QMenu("查看组成");
@@ -515,7 +515,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                         messageBox.exec();
                     }
                 });
-                dialog->show();
+                dialog->exec();
 
         });
 
@@ -572,8 +572,7 @@ void ClassTable::showContextMenu(const QPoint &pos)
                                     messageBox.exec();
                                 }
                             });
-                    dialog->show();
-
+                    dialog->exec();
                 });
 
         QAction *action8=new QAction("修改此行",this);

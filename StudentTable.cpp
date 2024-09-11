@@ -121,7 +121,7 @@ StudentTable::StudentTable():MyTableWidget()
                     }
                 });
 
-                dialog->show();
+                dialog->exec();
 
             });
 

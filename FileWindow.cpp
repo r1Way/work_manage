@@ -21,7 +21,22 @@ FileWindow::FileWindow()
 bool FileWindow::import(QString path)
 {
     QDir directory(path);
+
+        //检测文件夹是否存在
+        QDir dir(path);
+        if(!dir.exists())
+        {
+            dir.mkpath(path);
+        }
+
     QStringList files = directory.entryList(QDir::Files);
+
+    //初始化 清空每个标签页
+    while (tabWidget->count()>0)
+    {
+        tabWidget->removeTab(0);
+    }
+
     for(QString fileName : files)
     {
         qDebug() << fileName;

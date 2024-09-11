@@ -123,7 +123,7 @@ TeacherTable::TeacherTable()
                     }
                         });
 
-                dialog->show();
+                dialog->exec();
 
             });
 

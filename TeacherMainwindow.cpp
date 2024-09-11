@@ -340,7 +340,7 @@ void TeacherMainWindow::itemDoubleClicked(QTableWidgetItem *item,QStackedWidget 
                             tableWindow2->tableWidget->item(row,3)->setText(timeEdit->time().toString("hh:mm:ss"));
                             dialog->close();
                         });
-                        dialog->show();
+                        dialog->exec();
                     });
             contextMenu.addAction(action);
 
@@ -365,6 +365,11 @@ void TeacherMainWindow::homeworkDoubleClicked(QString classId,QString homeworkNa
                           "WHERE homework_student.class_id=%1 and "
                           "homework_student.name='%2';").arg(classId).arg(homeworkName);
     tableWindow3->connectDataBase(sql);
+    //对时间进行修改
+    for(int i=0;i<tableWindow3->tableWidget->rowCount();i++)
+    {
+        tableWindow3->tableWidget->item(i,3)->setText(tableWindow3->tableWidget->item(i,3)->text().left(8));
+    }
     tableWindow3->searchEdit->setPlaceholderText("输入学号、姓名、日期、时间分数以筛选");//设置edit
     stackedWidget->addWidget(tableWindow3);
     stackedWidget->setCurrentIndex(2);
@@ -604,6 +609,11 @@ void TeacherMainWindow::studentDoubleClicked(QString studentName,QString student
         stackedWidget->removeWidget(fileWindow);
         fileWindow->deleteLater();
         tableWindow3->fresh();
+        //对时间进行修改
+        for(int i=0;i<tableWindow3->tableWidget->rowCount();i++)
+        {
+            tableWindow3->tableWidget->item(i,3)->setText(tableWindow3->tableWidget->item(i,3)->text().left(8));
+        }
     });
 
 }
@@ -700,8 +710,14 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
                                       .arg(timeEdit->time().toString("HH:mm:ss"));
                     query.exec(sql);
                     dialog->close();
-                    //创建文件夹
+
+                    //检测文件夹是否存在
                     QDir dir(PATH+"/"+classId);
+                    if(!dir.exists())
+                    {
+                        dir.mkpath(PATH+"/"+classId);
+                    }
+                    //创建文件夹
                     if(!dir.exists(nameEdit->text()))
                     {
                         dir.mkdir(nameEdit->text());
@@ -709,7 +725,7 @@ void TeacherMainWindow::assignHomework(QString classId,TableWindow *tableWindow2
                 }
         }
     });
-    dialog->show();
+    dialog->exec();
 }
 
 void TeacherMainWindow::addHomework(QString classId, QString name, QString description, QString date, QString time,TableWindow *tableWindow2)
