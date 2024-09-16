@@ -20,8 +20,8 @@ FileWindow::FileWindow()
 
 bool FileWindow::import(QString path)
 {
-    QDir directory(path);
 
+    QDir directory(path);
     //检测文件夹是否存在
     if(!directory.exists())
     {
@@ -66,6 +66,7 @@ bool FileWindow::import(QString path)
             }
         }
     }
+    return true;//check
 }
 
 void FileWindow::wheelAll(QWheelEvent *e,CodeEditor *codeEdit)

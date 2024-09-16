@@ -350,7 +350,7 @@ void StudentMainwindow::homeworkDoubleClicked(QString classId,QString homeworkNa
         if (!process->waitForFinished())
         { // 等待程序执行完成
         qDebug() << "Execution failed:" << process->errorString();
-        return 1;
+        // return 1;
         }
 
         QByteArray output = process->readAllStandardOutput(); // 读取标准输出
@@ -495,15 +495,15 @@ void StudentMainwindow::handIn(QString classId, QString homeworkName,FileWindow 
         }
         else//曾提交
         {
-        QString sql=QString("UPDATE homework_student SET d='%1' ,t='%2' "
-                      "WHERE student_id=%3 and "
-                      "class_id=%4 and "
-                      "name='%5';").arg(date).arg(time).arg(user_account).arg(classId).arg(homeworkName);
-        query.exec(sql);
+            QString sql=QString("UPDATE homework_student SET d='%1' ,t='%2' "
+                          "WHERE student_id=%3 and "
+                          "class_id=%4 and "
+                          "name='%5';").arg(date).arg(time).arg(user_account).arg(classId).arg(homeworkName);
+            query.exec(sql);
         }
 
-        QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
-        fileWindow->import(filePath);
+        // QString filePath=PATH+QString("/%1/%2/%3").arg(classId).arg(homeworkName).arg(user_account);
+        // fileWindow->import(filePath);
     }
     else
     {
